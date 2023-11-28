@@ -5,14 +5,28 @@ const routes = [
   {
     path: '/home',
     component: () => import('@/views/Home.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/user/About.vue'),
+      },
+      {
+        path: 'seeking',
+        component: () => import('@/views/user/Seeking.vue'),
+      },
+      {
+        path: 'welcome',
+        component: () => import('@/views/user/Welcome.vue')
+      }
+    ]
   },
   {
-    path: '/seeking',
-    component: () => import('@/views/Seeking.vue'),
+    path: '/login',
+    component: () => import('@/views/Login.vue')
   },
   {
-    path: '/welcome',
-    component: () => import('@/views/Welcome.vue')
+    path: '/register',
+    component: () => import('@/views/Register.vue')
   }
 ]
 
