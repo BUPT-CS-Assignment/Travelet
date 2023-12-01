@@ -1,15 +1,14 @@
 <template>
-<v-app>
-<v-main class="d-flex flex-column">
-  <!-- header -->
-  <div>
-    <logo justify-start class="ml-4"/>
-  </div>
-  
+<v-app style="background-color: #EEEEEE;" class="d=flex">
+<div>
+  <logo justify-start class="ml-4"/>
+</div>
+
+<v-main class="align-self-center" max-width="1000px">
   <!-- main content -->
-  <v-container fluid class="fill-height d-flex flex-row justify-center">
+  <div class="fill-height d-flex flex-row flex-wrap">
     <!-- input -->
-    <div style="width: 420px;" class="align-self-center">
+    <div style="width: 420px;" class="ml-16 align-self-center">
       <p class="text-h4 font-weight-black mb-10">登录到 Travelet</p>
       <!-- username -->
       <p>用户名</p>
@@ -42,14 +41,12 @@
       </v-btn> 
     </div>
 
-
     <!-- brief intro -->
-    <div class="mx-16"></div>
-    <v-card class="d-flex flex-column" variant="text" style="width: 400px;">
+    <v-card class="ml-16 d-flex flex-column align-self-center" variant="text" style="width: 420px;">
       <!-- <v-card-title>
         <p class="text-h4 font-weight-black text-grey-darken-2 mb-4">{{ Intro.title }}</p>
       </v-card-title> -->
-      <v-card-text class="align-self-center justify-center">
+      <v-card-text class="align-self-start justify-center">
         <div v-for="(item, index) in Intro.content" class="d-flex flex-row my-8">
           <v-icon class="align-self-center mr-2" size="large" color="grey-darken-1">{{ item[1] }}</v-icon>
           <p class="text-h6 font-weight-bold text-grey-darken-1 align-self-center">{{ item[0] }}</p>
@@ -57,8 +54,7 @@
       </v-card-text>
     </v-card>
 
-  </v-container>
-    
+  </div>
 </v-main>
 </v-app>
 </template>

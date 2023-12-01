@@ -1,33 +1,65 @@
 <template>
-<v-card hover rounded="lg" min-width=220 max-width=600 max-height=300>
-  <div style="position: absolute; z-index: 2; bottom: 0;">
-    <v-card-title>
-      <template v-if="props.type === 'region'">
-        <p>{{ Data.province }}, {{ Data.city }}</p>
-      </template>
-      <template v-else>
-        <p>{{ Data.keywords }}</p>
-      </template>
-    </v-card-title>
-    <v-card-subtitle>
-      <p>{{ Data.date }}</p>
-    </v-card-subtitle>
-    <v-card-text>
-      <p>{{ Data.desc }}</p>
-    </v-card-text>
-  </div>
+<v-hover>
+  <template v-slot:default="{ isHovering, props }">
+    <v-card 
+      rounded="lg" variant="flat" 
+      min-width=400 max-width=800 
+      v-bind="props"
+      :elevation="isHovering ? 10 : 1"
+      @click="Dialog = true;"
+    >
+      <v-img :src="Data.imgs[getRandomInt(3)]"
+        aspect-ratio="4/3"
+      />
 
-  <!-- background -->
-  <v-img :src="Data.imgs[getRandomInt(3)]"
-    class="align-end"
-    gradient="to bottom, rgba(255,255,255,.33), rgba(255,255,255,1)"
-    cover
-  />
-</v-card>
+      <v-card-title>
+        <template v-if="props.type === 'region'">
+          <p>{{ Data.province }}, {{ Data.city }}</p>
+        </template>
+        <template v-else>
+          <p>{{ Data.keywords }}</p>
+        </template>
+      </v-card-title>
+
+      <v-card-subtitle class="my-5">
+        <p>{{ Data.date }}</p>
+      </v-card-subtitle>
+      <v-divider></v-divider>
+      <v-card-text>
+        <p>{{ Data.desc }}</p>
+      </v-card-text>
+
+      <!-- background -->
+      
+    </v-card>
+  
+  
+  
+  
+  </template>
+</v-hover>
+
+<v-dialog
+  v-model="Dialog"
+  width="85%"
+  height="80%"
+>
+  <v-card height="100%" rounded="lg">
+    <v-card-title>
+      探索世界
+    </v-card-title>
+
+    <v-card-text>
+
+    </v-card-text>
+  </v-card>
+</v-dialog>
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { ref, reactive } from 'vue';
+
+const Dialog = ref(false);
 
 const props = defineProps({
   type: {

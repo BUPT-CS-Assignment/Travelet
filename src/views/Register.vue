@@ -1,5 +1,5 @@
 <template>
-<v-app>
+<v-app style="background-color: #EEEEEE;">
 <v-main class="d-flex flex-column">
   <!-- header -->
   <div>

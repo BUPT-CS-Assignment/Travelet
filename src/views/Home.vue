@@ -1,39 +1,41 @@
 <template>
-<v-app>
+<v-app style="background-color: #EEEEEE;">
   <!-- header bar -->
-  <v-app-bar >
-    <logo class="ml-4"></logo>
-    
-    <!-- navigation -->
-    <div class="ml-6 d-flex flex-row">
-      <v-btn v-for="(item, key) in Targets" :key="key"
-        :variant="Selected === key ? 'tonal' : 'text'"
-        color="grey-lighten-1"
-        rounded="lg" class="mx-1 px-6"
-        @click="targetTo(key)"
-      >
-        <p class="text-subtitle-1 align-self-end text-black"
-          :class="Selected === key ? 'font-weight-black' : 'font-weight-regular'"
-        >
-          {{ Targets[key].name }}
-        </p>
-      </v-btn>
-    </div>
+  <v-app-bar class="pt-2 pb-4 " elevation="0" style="background: none;">
+    <template v-slot:image>
+      <v-img 
+        gradient="to bottom, 
+          rgba(238,238,238,1) 0%,
+          rgba(238,238,238,1) 40%, 
+          rgba(238,238,238,.77) 60%,
+          rgba(238,238,238,0) 100%"
+      />
+    </template>
+    <logo class="ml-10 mb-2"></logo>
 
-    <!-- avatar -->
+    <!-- navigation -->
     <template v-slot:append>
-      <v-btn variant="plain" rounded="lg">
-        <p class="text-black">注销</p>
-      </v-btn>
-      <v-avatar :size="40" class="ml-1 mr-4" color="grey">
-        <span class="text-h6"> {{ Username[0] }}</span>
-      </v-avatar>
+      <v-hover v-for="(item, key) in Targets" :key="key">
+        <template v-slot:default="{ isHovering, props }">
+          <v-btn v-bind="props"
+            variant="text" rounded="lg"
+            :color="isHovering ? 'blue-accent-2' : 'grey-darken-3'"
+            @click="targetTo(key)"
+          >
+            <p class="text-subtitle-1 font-weight-black">
+              {{ Targets[key].name }}
+            </p>
+          </v-btn>
+        </template>
+      </v-hover>
+
+      <v-btn icon="mdi-logout-variant" color="grey-darken-3"></v-btn>
     </template>
   </v-app-bar>
 
   <!-- main router page -->
-  <v-main>
-    <router-view />
+  <v-main class="ma-10">
+    <router-view/>
   </v-main>
 
 </v-app>
@@ -73,7 +75,7 @@ function targetTo(key) {
 }
 
 onMounted(() => {
-  targetTo('about');
+  // targetTo('about');
 })
 
 </script>

@@ -1,39 +1,52 @@
 <template>
-<v-container class="d-flex flex-column">
+<div class="d-flex flex-column">
+
+  <!-- title -->
+  <div class="align-self-center d-flex justify-center"
+    style="position: relative; width: 200px;"
+  >
+    <v-btn style="position: absolute; right: 10px; bottom: 2px;"
+      color="blue-accent-3" elevation="0"
+      size="small" density="comfortable"
+      icon="mdi-plus"
+    />
+
+    <p class=" text-h5 font-weight-black align-self-center">
+      探索 世界
+    </p>
+    
+  </div>
+  
+  
+  <p class="align-self-center text-caption text-grey-darken-2">
+    Page {{ CurPage }} / {{ PageLen }}
+  </p>
+  
+  <!-- search bar -->
+  <div style="min-width: 400px; max-width: 600px;" class="align-self-center">
+    <v-divider class="my-6" />
+    <SearchBar class="align-self-center mb-4" style="height: 90px;"
+      :tags="TagsPreset"
+    />
+  </div>
+
+  <v-spacer class="my-2"></v-spacer>
   <!-- header -->
   <div class="d-flex flex-row ml-auto">
     <!-- post new -->
-    <v-btn :disabled="search_open"
-      color="blue-accent-3" class="mx-1"
-      rounded="lg" elevation="0"
-      append-icon="mdi-plus"
-    >
-    <p class="text-body-1">发布</p>
-    </v-btn>
+    
 
-    <!-- searching -->
-    <v-btn @click="search_open = !search_open; tags = []"
-      color="green-lighten-1" class="mx-1"
-      rounded="lg" elevation="0"
-      :append-icon="search_open ? 'mdi-close' : 'mdi-magnify'"
-    >
-      <p class="text-body-1">搜索</p>
-    </v-btn>
   </div>
 
-  <!-- search bar -->
-  <div v-if="search_open" class="my-2">
-    <SearchBar :tags="TagsPreset" :watch="onTagChange"></SearchBar>
-  </div>
 
   <!-- post content -->
-  <v-container>
+  <div class="my-2">
     <v-row>
       <v-col v-for="(item, index) in 8">
         <poster type="region"/>
       </v-col>
     </v-row>
-  </v-container>
+  </div>
   
 
   <!-- page navigation -->
@@ -41,7 +54,7 @@
     v-model="CurPage"
     :length="PageLen"
   />
-</v-container>
+</div>
 </template>
 
 <script setup>

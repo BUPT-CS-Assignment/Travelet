@@ -83,7 +83,7 @@ import { reactive } from 'vue';
 const ClassDiv = 'd-flex flex-row my-8'
 const ClassDesc = 'align-self-end text-h5 font-weight-bold text-grey-darken-2'
 const ClassData = 'align-self-end text-h4 font-weight-black'
-const AvatarSize = 220;
+const AvatarSize = 160;
 
 const UserData = reactive({
   name: 'user',
