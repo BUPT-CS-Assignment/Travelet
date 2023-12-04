@@ -50,10 +50,11 @@
         @click:append-inner="Input.vis2 = !Input.vis2"
       />
 
-      <!-- login -->
+      <!-- register -->
       <v-btn color="green-darken-1" variant="elevated" class="mt-4" width="420px"
         :disabled="Input.usr.length == 0 || Input.pwd.length == 0 || Input.pwd2.length == 0 || RegionRef.getCity().length == 0"
-      >
+        @click="register"
+        >
         <p class="font-weight-bold">注册</p>
       </v-btn> 
 
@@ -103,6 +104,30 @@ function targetLogin() {
   Input.vis2 = false;
   RegionRef.value.clear()
   Router.push('/login');
+}
+
+function register() {
+  fetch('http://localhost:3000/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      username: Input.usr,
+      password: Input.pwd,
+      phone: Input.phone,
+      region: RegionRef.value.getCity()
+    })
+  })
+  .then(res => res.json())
+  .then(res => {
+    if(res.status == 0) {
+      Router.push('/login');
+    } else {
+      alert('注册失败');
+    }
+  })
+  .catch(err => alert(err));
 }
 
 

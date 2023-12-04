@@ -6,7 +6,7 @@
       min-width=400 max-width=800 
       v-bind="props"
       :elevation="isHovering ? 6 : 1"
-      @click="Dialog = true;"
+      @click=""
     >
       <v-img :src="Data.imgs[0]"
         aspect-ratio="4/3"
@@ -40,43 +40,23 @@
         <v-spacer class="my-1"></v-spacer>
 
         <div class="d-flex">
-          <v-icon color="grey-darken-1 align-self-center" class="mr-1">
-            mdi-tag-multiple-outline
-          </v-icon>
-          <v-btn v-for="(tag, index) in Data.tags"
-            variant="text" size="small" class="align-self-center"
-          >
-            <p class="text-caption text-decoration-underline">
-              {{ tag }}
-            </p>
-          </v-btn>
+          <v-chip size="small" v-for="(tag, index) in Data.tags"
+            class="mr-1" color="grey" style="z-index:9"
+            @click="console.log(1)"
+          > 
+            <strong class="text-blue-accent-3">#</strong>
+            <p class="text-black">{{ tag }}</p>
+          </v-chip>
         </div>
       </div>
     </v-card>
   </template>
 </v-hover>
-
-<v-dialog
-  v-model="Dialog"
-  width="85%"
-  height="80%"
->
-  <v-card height="100%" rounded="lg">
-    <v-card-title>
-      探索世界
-    </v-card-title>
-
-    <v-card-text>
-
-    </v-card-text>
-  </v-card>
-</v-dialog>
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue';
 
-const Dialog = ref(false);
 
 const props = defineProps({
   type: {

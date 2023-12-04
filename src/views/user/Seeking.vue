@@ -9,10 +9,11 @@
       color="blue-accent-3" elevation="0"
       size="small" density="comfortable"
       icon="mdi-plus"
+      @click="Dialog=true;"
     />
 
     <p class=" text-h5 font-weight-black align-self-center">
-      探索 世界
+      探索世界
     </p>
     
   </div>
@@ -25,7 +26,7 @@
   <!-- search bar -->
   <div style="min-width: 400px; max-width: 600px;" class="align-self-center">
     <v-divider class="my-6" />
-    <SearchBar class="align-self-center mb-4" style="height: 90px;"
+    <TagBar class="align-self-center mb-4" style="height: 90px;"
       :tags="TagsPreset"
     />
   </div>
@@ -55,19 +56,27 @@
     :length="PageLen"
   />
 </div>
+<v-dialog 
+  v-model="Dialog"
+  width="85%"
+  height="80%"
+>
+  <NewPost></NewPost>
+</v-dialog>
 </template>
 
 <script setup>
 import {ref, reactive} from 'vue';
-import SearchBar from '@/components/SearchBar.vue'
+import TagBar from '@/components/TagBar.vue'
 import Poster from '@/components/RequestPoster.vue';
+import NewPost from '@/components/NewPost.vue'
+import TagsPreset from '@/plugins/tags'
 
 const PageLen = ref(1);
 const CurPage = ref(1);
+const Dialog = ref(false);
 
-const TagsPreset = [
-  '钓鱼','老少皆宜','休闲','农家院','温泉度假','僻静休闲','游乐场'
-]
+
 const search_open = ref(false)
 
 function onTagChange(val) {

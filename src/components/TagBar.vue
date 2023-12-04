@@ -5,7 +5,7 @@
     label="选择或输入关键词"
   >
     <template v-slot:prepend-inner>
-      <v-btn icon="mdi-magnify" variant="text"
+      <v-btn :icon="props.icon" variant="text"
         color="grey"
         @click="props.action"
       />
@@ -23,6 +23,10 @@ const props = defineProps({
   tags: {
     type: Array,
     default: []
+  },
+  icon: {
+    type: String,
+    default: 'mdi-magnify'
   },
   action: {
     type: Function,

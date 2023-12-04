@@ -6,7 +6,7 @@
       min-width=400 max-width=800 
       v-bind="props"
       :elevation="isHovering ? 10 : 1"
-      @click="Dialog = true;"
+      @click=""
     >
       <v-img :src="Data.imgs[getRandomInt(3)]"
         aspect-ratio="4/3"
@@ -62,27 +62,10 @@
   </template>
 </v-hover>
 
-<v-dialog
-  v-model="Dialog"
-  width="85%"
-  height="80%"
->
-  <v-card height="100%" rounded="lg">
-    <v-card-title>
-      探索世界
-    </v-card-title>
-
-    <v-card-text>
-
-    </v-card-text>
-  </v-card>
-</v-dialog>
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue';
-
-const Dialog = ref(false);
 
 const props = defineProps({
   type: {

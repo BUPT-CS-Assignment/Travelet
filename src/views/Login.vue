@@ -26,7 +26,10 @@
         @click:append-inner="Input.vis = !Input.vis"
       />
       <!-- login -->
-      <v-btn color="blue-accent-3" variant="elevated" class="mt-4" width="300px" :disabled="Input.pwd.length == 0">
+      <v-btn color="blue-accent-3" variant="elevated" class="mt-4" width="300px" 
+        :disabled="Input.pwd.length == 0"
+        @click="login"
+        >
         <p class="font-weight-bold">登录</p>
       </v-btn> 
       <!-- register -->
@@ -86,6 +89,29 @@ function targetRegister() {
   Input.vis = false
 
   Router.push('/register');
+}
+
+function login() {
+  console.log('login');
+  fetch('http://localhost:3000/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      username: Input.usr,
+      password: Input.pwd
+    })
+  })
+  .then(res => res.json())
+  .then(res => {
+    if(res.status == 0) {
+      Router.push('/home');
+    } else {
+      alert('用户名或密码错误');
+    }
+  })
+  .catch(err => alert(err));
 }
 
 </script>

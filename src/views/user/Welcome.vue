@@ -13,7 +13,7 @@
     <!-- search bar -->
     <div style="min-width: 400px; max-width: 600px;" class="align-self-center">
       <v-divider class="my-6" />
-      <SearchBar class="align-self-center mb-4" style="height: 90px;"
+      <TagBar class="align-self-center mb-4" style="height: 90px;"
         :tags="TagsPreset"
       />
     </div>
@@ -45,8 +45,9 @@
 
 <script setup>
 import {ref, reactive} from 'vue';
-import SearchBar from '@/components/SearchBar.vue'
+import TagBar from '@/components/TagBar.vue'
 import Poster from '@/components/ResponsePoster.vue';
+import TagsPreset from '@/plugins/tags'
 
 const PageLen = ref(1);
 const CurPage = ref(1);
@@ -56,9 +57,7 @@ const UserData = reactive({
   loc2: '海淀区',
 })
 
-const TagsPreset = [
-  '钓鱼','老少皆宜','休闲','农家院','温泉度假','僻静休闲','游乐场'
-]
+
 const search_open = ref(false)
 
 function onTagChange(val) {
