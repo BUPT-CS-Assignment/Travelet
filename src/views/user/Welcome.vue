@@ -2,7 +2,7 @@
 <div class="d-flex flex-column">
   <!-- title -->
   <p class=" text-h5 font-weight-black align-self-center">
-    有朋 自远方来
+    有朋自远方来
   </p>
 
   <!-- data num -->
@@ -28,8 +28,8 @@
   <!-- post content -->
   <div class="my-2">
     <v-row>
-      <v-col v-for="(item, index) in 8">
-        <poster type="keyword"/>
+      <v-col v-for="(item, index) in 8" class="ma-2">
+        <poster />
       </v-col>
     </v-row>
   </div>
@@ -46,7 +46,7 @@
 <script setup>
 import {ref, reactive} from 'vue';
 import SearchBar from '@/components/SearchBar.vue'
-import Poster from '@/components/Poster.vue';
+import Poster from '@/components/ResponsePoster.vue';
 
 const PageLen = ref(1);
 const CurPage = ref(1);

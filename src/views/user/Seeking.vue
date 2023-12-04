@@ -42,8 +42,8 @@
   <!-- post content -->
   <div class="my-2">
     <v-row>
-      <v-col v-for="(item, index) in 8">
-        <poster type="region"/>
+      <v-col v-for="(item, index) in 8" class="ma-2">
+        <poster />
       </v-col>
     </v-row>
   </div>
@@ -60,7 +60,7 @@
 <script setup>
 import {ref, reactive} from 'vue';
 import SearchBar from '@/components/SearchBar.vue'
-import Poster from '@/components/Poster.vue';
+import Poster from '@/components/RequestPoster.vue';
 
 const PageLen = ref(1);
 const CurPage = ref(1);
