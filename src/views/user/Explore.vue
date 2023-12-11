@@ -32,19 +32,12 @@
   </div>
 
   <v-spacer class="my-2"></v-spacer>
-  <!-- header -->
-  <div class="d-flex flex-row ml-auto">
-    <!-- post new -->
-    
-
-  </div>
-
 
   <!-- post content -->
   <div class="my-2">
     <v-row>
-      <v-col v-for="(item, index) in 8" class="ma-2">
-        <poster />
+      <v-col v-for="(value, key) in Posts" class="ma-2">
+        <poster :id="Number(key)" :data="value"/>
       </v-col>
     </v-row>
   </div>
@@ -63,7 +56,7 @@
   transition="dialog-bottom-transition"
   v-model="Dialog"
 > 
-  <NewPost min-width="640" max-width="800"
+  <NewPost
     :onCancel="()=>{Dialog=false;}"
     :onComplete="()=>{Dialog=false;}"
   ></NewPost>
@@ -71,14 +64,14 @@
 </template>
 
 <script setup>
-import {ref, reactive} from 'vue';
+import {ref, reactive, onMounted} from 'vue';
 import { useRouter } from 'vue-router';
 
 import TagBar from '@/components/TagBar.vue'
 import Poster from '@/components/RequestPoster.vue';
 import NewPost from '@/components/NewPost.vue'
 import TagsPreset from '@/plugins/tags'
-import { onMounted } from 'vue';
+
 import * as QUERY from '@/plugins/query'
 
 const Router = useRouter();
@@ -87,15 +80,18 @@ const PageLen = ref(1);
 const CurPage = ref(1);
 const Dialog = ref(false);
 
-
-const search_open = ref(false)
-
-function onTagChange(val) {
-  console.log(val)
-}
+const Posts = reactive({})
 
 onMounted(() => {
-  QUERY.get('/api/user/request/query', )
+  QUERY.get('/api/user/request/query_brief', {
+    page : 1,
+    str : ""
+  }, 'poster_id')
+  .then(data => {
+    data.data.forEach(element => {
+      Posts[element.id] = element
+    });
+  }) 
 })
 
 

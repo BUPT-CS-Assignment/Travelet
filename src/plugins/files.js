@@ -1,18 +1,37 @@
-function handleFileInput(event, dest) {
+function handleFileInput(event, dest, hook = ()=>{}) {
   const files = event.target.files;
   for (let i = 0; i < files.length; i++) {
-    var file = files[i];
-    const reader = new FileReader();
-    reader.onload = () => {
-      file['raw'] = reader.result;
-      dest.push(file);
-    }
-    reader.readAsDataURL(file);
+    dest.push(files[i]);
+    hook(i, files[i]);
   }
 }
 
-function handleFileRemove(idx, dest) {
+function read(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve(reader.result);
+    }
+    reader.readAsDataURL(file);
+  })
+}
+
+function sync_read(file, onsuccess) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    onsuccess(reader.result);
+  }
+  reader.readAsDataURL(file);
+}
+
+async function async_read(file) {
+  const raw = await async_read(file);
+  return raw;
+}
+
+function handleFileRemove(idx, dest, hook=()=>{}) {
   dest.splice(idx, 1);
+  hook(idx);
 }
 
 function formatFileSize(size) {
@@ -36,4 +55,4 @@ function iconFileType(ftype) {
   else return 'mdi-file-question';
 }
 
-export {handleFileInput, handleFileRemove ,formatFileSize, iconFileType}
+export {async_read, sync_read, handleFileInput, handleFileRemove ,formatFileSize, iconFileType}

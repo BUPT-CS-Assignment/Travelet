@@ -1,13 +1,12 @@
 <template>
-<!-- post button -->
-<v-btn height="60" color="blue-accent-3" rounded="0" elevation="0"
-  @click="props.onClick"
+<!-- post title -->
+<v-card height="60" color="blue-accent-3" rounded="0" elevation="0"
+  class="d-flex justify-center align-center"
 >
   <p class="text-h6 font-weight-bold">
-    发布
+    发布新请求
   </p>
-</v-btn>
-
+</v-card>
 <!-- stepper -->
 <v-stepper rounded="0" v-model="Step">
   <template v-slot:default="{prev, next}">
@@ -71,7 +70,7 @@
       <v-stepper-window-item :value="3">
         <v-file-input ref="ImageInputRef"
           style="position: absolute;display: none;" accept="image/*"
-          @change="(event) => handleFileInput(event, Input.images)"
+          @change="(event) => FILES.handleFileInput(event, Input.images, updateImage)"
           multiple
         />
 
@@ -81,10 +80,10 @@
 
         <v-row class="mt-4">
           <v-col v-for="(item, index) in Input.images" cols="auto">
-            <v-img :src="item.raw" aspect-ratio="1" cover min-width="200">
+            <v-img :src="Input.image_data[index]" aspect-ratio="1" cover min-width="200">
               <div class="d-flex">
                 <v-btn icon="" variant="text" color="red" size="small" class="ml-auto"
-                  @click="handleFileRemove(index, Input.images)"
+                  @click="FILES.handleFileRemove(index, Input.images, removeImage)"
                 >
                   <v-icon size="large">mdi-close</v-icon>
                 </v-btn>
@@ -99,7 +98,7 @@
         <v-file-input
           style="position: absolute;display: none;"
           ref="FileInputRef"
-          @change="(event) => handleFileInput(event, Input.files)"
+          @change="(event) => FILES.handleFileInput(event, Input.files)"
           multiple
         />
 
@@ -110,16 +109,16 @@
         <v-list>
           <v-list-item v-for="(file, index) in Input.files" :key="index"
             :title="file.name"
-            :subtitle="formatFileSize(file.size)"
+            :subtitle="FILES.formatFileSize(file.size)"
           >
             <template v-slot:prepend>
               <v-icon color="grey-darken-3">
-                {{ iconFileType(file.type) }}
+                {{ FILES.iconFileType(file.type) }}
               </v-icon>
             </template>
             <template v-slot:append>
               <v-btn icon="" variant="text" color="red" size="small"
-                @click="handleFileRemove(index, Input.files)"
+                @click="FILES.handleFileRemove(index, Input.files)"
               >
                 <v-icon size="large">mdi-close</v-icon>
               </v-btn>
@@ -138,9 +137,17 @@
       <v-btn @click="props.onCancel" class="ml-auto mr-4" variant="text" color="red" width="80">
         <p class="text-subtitle-1 font-weight-bold">取消</p>
       </v-btn>
-      <v-btn @click="next" :disabled="Step == Steps.length" variant="text" width="80">
-        <p class="text-subtitle-1 font-weight-bold">下一步</p>
-      </v-btn>
+      <template v-if="Step >= Steps.length">
+        <v-btn @click="upload" variant="flat" width="80" color="blue-accent-3">
+          <p class="text-subtitle-1 font-weight-bold">发布</p>
+        </v-btn>
+      </template>
+      <template v-else>
+        <v-btn @click="next" :disabled="!checkNext(Step)" variant="text" width="80">
+          <p class="text-subtitle-1 font-weight-bold">下一步</p>
+        </v-btn>
+      </template>
+      
     </div>
 
   </template>
@@ -152,7 +159,8 @@ import { ref, reactive } from 'vue';
 import RegionSelect from './RegionSelect.vue';
 import TagBar from './TagBar.vue';
 import TagsPreset from '@/plugins/tags'
-import {handleFileInput, handleFileRemove ,formatFileSize, iconFileType} from '@/plugins/files'
+import * as FILES from '@/plugins/files'
+import * as QUERY from '@/plugins/query'
 
 const props = defineProps({
   onCancel: {
@@ -170,6 +178,7 @@ const Input = reactive({
   tags: [],
   desc: 'Description',
   images: [],
+  image_data: [],
   files: [],
 })
 
@@ -180,31 +189,75 @@ const FileInputRef = ref(null);
 const Step = ref(1);
 const Steps = ['Step1', 'Step2', 'Step3', 'Step4'];
 
+function updateImage(idx, file) {
+  Input.image_data.push(null);
+  FILES.sync_read(file ,(res) => {
+    Input.image_data[idx] = res;
+  });
+}
+
+function removeImage(idx) {
+  Input.image_data.splice(idx, 1);
+}
+
+function checkNext(index) {
+  switch (index) {
+    case 1:
+      return checkStep1();
+    case 2:
+      return checkStep2();
+    default:
+      return true;
+  }
+}
+
+function checkStep1(){
+  if(!RegionSelectRef.value) return false;
+  return Input.brief.length > 0 && RegionSelectRef.value.isComplete();
+}
+
+function checkStep2(){
+  return Input.desc.length > 0;
+}
+
+
 function upload() {
-  const formData = new FormData();
+  if(!checkStep1() || !checkStep2()) {
+    alert('请填写完整信息');
+    return;
+  }
+
+  var formData = new FormData();
+  // poster_id
+  formData.append('poster_id', QUERY.get_user_id());
   // brief
-  formData.append('brief', Input.brief);
+  formData.append('title', Input.brief);
   // tags
   for (let i = 0; i < Input.tags.length; i++) {
     const tag = Input.tags[i];
     formData.append('tags[]', tag);
   }
   // desc
-  formData.append('desc', Input.desc);
+  formData.append('description', Input.desc);
   // region
-  const region = RegionSelectRef.value.getString();
-  formData.append('region', city);
+  const city = RegionSelectRef.value.getString();
+  formData.append('city', city);
   // images
   for (let i = 0; i < Input.images.length; i++) {
     const file = Input.images[i];
-    formData.append('files[]', file);
+    formData.append('image_files', file);
   }
   // files
   for (let i = 0; i < Input.files.length; i++) {
     const file = Input.files[i];
-    formData.append('files[]', file);
+    formData.append('raw_files', file);
   }
 
+  // post
+  QUERY.post('/api/user/request/post', formData, null, false)
+  .then(res => {
+    console.log(res)
+  })
 }
 
 </script>

@@ -46,7 +46,7 @@
       <v-file-input
         style="position: absolute;display: none;"
         ref="FileInputRef"
-        @change="(event) => handleFileInput(event, Data.files)"
+        @change="(event) => FILES.handleFileInput(event, Data.files)"
         multiple
       />
 
@@ -58,16 +58,16 @@
     </div>
     <v-list-item v-for="(file, index) in Data.files" :key="index"
       :title="file.name"
-      :subtitle="formatFileSize(file.size)"
+      :subtitle="FILES.formatFileSize(file.size)"
     >
       <template v-slot:prepend>
         <v-icon color="grey-darken-3">
-          {{ iconFileType(file.type) }}
+          {{ FILES.iconFileType(file.type) }}
         </v-icon>
       </template>
       <template v-if="modified" v-slot:append>
         <v-btn icon="" variant="text" color="red" size="small"
-          @click="handleFileRemove(index, Input.files)"
+          @click="FILES.handleFileRemove(index, Input.files)"
         >
           <v-icon size="large">mdi-close</v-icon>
         </v-btn>
@@ -98,12 +98,13 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import {handleFileInput, handleFileRemove ,formatFileSize, iconFileType} from '@/plugins/files'
+import { ref, reactive, onMounted } from 'vue';
+import * as FILES from '@/plugins/files'
+import * as QUERY from '@/plugins/query'
 
 const props = defineProps({
   uid: {
-    type: String,
+    type: Number,
     required: true
   },
   modified: {
@@ -127,5 +128,7 @@ const Data = reactive({
 const ImageInputRef = ref(null);
 const FileInputRef = ref(null);
 
+onMounted(() => {
 
+})
 </script>

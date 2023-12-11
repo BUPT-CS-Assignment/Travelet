@@ -14,6 +14,9 @@ function set_user_id(uid) {
   localStorage.setItem('userid', uid);
 }
 
+function fileURL(uid) {
+  return '/api/file/download/' + String(uid)
+}
 
 function get(url, param = {}, identifier = null) {
   if(param == null) param = {}
@@ -39,7 +42,6 @@ function get(url, param = {}, identifier = null) {
     })
     .catch(err => {
       console.log(err)
-      alert(err)
     })
   })
 }
@@ -68,9 +70,8 @@ function post(url, data, identifier = null, json = true, headers = {}) {
     })
     .catch(err => {
       console.log(err)
-      alert(err)
     })
   })
 }
 
-export {get, post, set_user_id, get_user_id, set_user_name, get_user_name}
+export {get, post, fileURL, set_user_id, get_user_id, set_user_name, get_user_name}

@@ -12,7 +12,7 @@
       <v-chip class="ml-3 font-weight-bold" 
         label color="grey-darken-2"
       >
-        {{ Request.loc1 }}, {{ Request.loc2 }}
+        {{ Request.location }}
       </v-chip>
     </div>
 
@@ -28,13 +28,18 @@
         </p>
 
         <!-- date -->
-        <p class="text-blue-accent-2 text-subtitle-2 my-1">
-          POSTED: {{ Request.date }}
+        <p class="text-subtitle-2 my-1">
+          发布时间: {{ Request.create_time }}
         </p>
 
-        <p class="text-blue-accent-2 text-subtitle-2 my-1">
-          RESPONSED: {{ Response.date }}
+        <!-- date -->
+        <p class="text-subtitle-2 my-1">
+          修改时间: {{ Request.modify_time }}
         </p>
+
+        <!-- <p class="text-blue-accent-2 text-subtitle-2 my-1">
+          RESPONSED: {{ Response.date }}
+        </p> -->
         
         <v-divider width=300 class="mt-4 mb-2" />
 
@@ -55,13 +60,15 @@
       <div class="flex-grow-1 mx-auto" 
         style="min-width: 400px; max-width: 800px;"
       >
-        <v-carousel
+        <v-carousel v-if="Request.images.length > 0"
+          cycle show-arrows="hover"
           hide-delimiter-background
           height="300"
         >
-          <v-carousel-item v-for="(img, index) in Request.imgs"
-            :src="img" cover
-          >
+          <v-carousel-item v-for="(uid, index) in Request.images">
+            <v-img :src="QUERY.fileURL(uid)" cover :no-transition="true"
+              lazy-src="https://fakeimg.pl/400x300/?retina=1&text=image&font=lobster"
+            ></v-img>
           </v-carousel-item>
 
         </v-carousel>
@@ -77,7 +84,7 @@
         描述
       </v-card-title>
       <v-card-text class="d-flex text-grey-darken-2">
-        {{ Response.desc }}
+        {{ Request.desc }}
       </v-card-text>
     </v-card>
 
@@ -86,7 +93,7 @@
     <!-- personal response -->
     <template v-if="1 in Response">
       <p class="ml-2 text-h6 font-weight-bold">我的响应</p>
-      <detail-response :uid="uid" :modified="true"></detail-response>
+      <detail-response :uid="1" :modified="true"></detail-response>
     </template>
     <template v-else>
       <v-btn class="mb-4" elevation="0" color="blue-accent-2">
@@ -112,12 +119,14 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useRoute } from 'vue-router';
-
 import DetailResponse from '@/components/DetailResponse.vue'
+import * as FILES from '@/plugins/files'
+import * as QUERY from '@/plugins/query'
+import { onMounted } from 'vue';
+
 
 const Route = useRoute();
-const id = Route.params.id;
-
+const POST_ID = Route.params.id;
 
 const StatusString = [
   {text:'进行中', color:'green'},
@@ -127,20 +136,15 @@ const StatusString = [
 ]
 
 const Request = reactive({
-  loc1: '北京市',
-  loc2: '海淀区',
-  tags: ['tag1','tag2'],
-  date: '2023.11.28',
-  biref: 'Brief Title AAAAAAA BBBBBBB CCCCCCC',
-  desc: 'Description',
+  location: '',
+  tags: [],
+  create_time: '',
+  modify_time: '',
+  biref: '',
+  desc: '',
   status: 0,
-  imgs: ['https://cdn.vuetifyjs.com/images/cards/house.jpg', 
-    'https://cdn.vuetifyjs.com/images/cards/road.jpg',
-    'https://cdn.vuetifyjs.com/images/cards/plane.jpg'
-  ],
-  files: [
-
-  ]
+  images: [],
+  files: []
 })
 
 const Response = reactive([1,2,3,4])
@@ -157,5 +161,25 @@ const Response = reactive([1,2,3,4])
 
 //   ]
 // })
+
+onMounted(() => {
+  QUERY.get('/api/user/request/query_detail',{
+    request_id : POST_ID
+  })
+  .then(data => {
+    const info = data.data;
+    Request.location = info.city;
+    Request.create_time = info.create_time;
+    Request.modify_time = info.modify_time;
+    Request.biref = info.title;
+    Request.tags = info.tags;
+    Request.desc = info.description;
+    Request.status = info.status;
+    Request.images = info.image_files;
+    Request.files = info.raw_files;
+  })
+  
+  
+})
 
 </script>

@@ -42,6 +42,7 @@ defineExpose({
   getProvince: () => Input.loc1,
   getCity: () => Input.loc2,
   getString: () => `${Input.loc1},${Input.loc2}`,
+  isComplete: () => Input.loc1.length > 0 && Input.loc2.length > 0,
   clear: () => {
     Input.loc1 = ''
     Input.loc2 = ''
