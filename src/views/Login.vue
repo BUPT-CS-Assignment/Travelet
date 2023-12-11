@@ -66,6 +66,8 @@
 import { ref, reactive } from 'vue';
 import Logo from '@/components/Logo.vue';
 import { useRouter } from 'vue-router';
+import * as QUERY from '@/plugins/query'
+
 
 const Router = useRouter();
 
@@ -92,26 +94,18 @@ function targetRegister() {
 }
 
 function login() {
-  console.log('login');
-  fetch('http://localhost:3000/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      username: Input.usr,
-      password: Input.pwd
-    })
+  QUERY.post('/api/user/login',{
+    username: Input.usr,
+    password: Input.pwd
   })
-  .then(res => res.json())
   .then(res => {
-    if(res.status == 0) {
+    if(res.status == 0){
+      QUERY.set_user_name(Input.usr);
+      QUERY.set_user_id(res.user_id);
       Router.push('/home');
-    } else {
-      alert('用户名或密码错误');
     }
+    else alert('用户名或密码错误');
   })
-  .catch(err => alert(err));
 }
-
+  
 </script>

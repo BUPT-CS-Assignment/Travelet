@@ -1,7 +1,7 @@
 <template>
   <v-combobox :items="TagsPreset" v-model="tags"
     chips clearable multiple
-    variant="solo" rounded="lg" color="grey-darken-3"
+    :variant="props.variant" rounded="lg" color="grey-darken-3"
     label="选择或输入关键词"
   >
     <template v-slot:prepend-inner>
@@ -27,6 +27,10 @@ const props = defineProps({
   icon: {
     type: String,
     default: 'mdi-magnify'
+  },
+  variant:{
+    type:String,
+    default: 'solo'
   },
   action: {
     type: Function,

@@ -41,6 +41,7 @@ function updateCities() {
 defineExpose({
   getProvince: () => Input.loc1,
   getCity: () => Input.loc2,
+  getString: () => `${Input.loc1},${Input.loc2}`,
   clear: () => {
     Input.loc1 = ''
     Input.loc2 = ''

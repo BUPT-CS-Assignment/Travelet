@@ -11,16 +11,16 @@ const routes = [
         component: () => import('@/views/user/About.vue'),
       },
       {
-        path: 'seeking',
-        component: () => import('@/views/user/Seeking.vue'),
+        path: 'explore',
+        component: () => import('@/views/user/Explore.vue'),
       },
       {
-        path: 'welcome',
-        component: () => import('@/views/user/Welcome.vue')
+        path: 'greet',
+        component: () => import('@/views/user/Greet.vue')
       },
       {
         path: 'detail/:id',
-        component: () => import('@/views//user/Detail.vue')
+        component: () => import('@/views/user/Detail.vue')
       }
     ]
   },

@@ -48,8 +48,6 @@ import Logo from '@/components/Logo.vue'
 
 const Router = useRouter();
 
-const Username = ref('user');
-
 const Targets = {
   about: {
     name: '主页',
@@ -58,12 +56,12 @@ const Targets = {
   },
   seeking: {
     name: '寻去处',
-    link: '/seeking',
+    link: '/explore',
     icon: 'mdi-map-search'
   },
   welcome: {
     name: '欢迎来',
-    link: '/welcome',
+    link: '/greet',
     icon: 'mdi-map-marker-star'
   }
 }

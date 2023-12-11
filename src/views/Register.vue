@@ -81,6 +81,7 @@ import { ref, reactive, toRaw, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Logo from '@/components/Logo.vue';
 import RegionSelect from '@/components/RegionSelect.vue';
+import * as QUERY from '@/plugins/query'
 
 const RegionRef = ref(null);
 const Router = useRouter();
@@ -107,27 +108,22 @@ function targetLogin() {
 }
 
 function register() {
-  fetch('http://localhost:3000/register', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      username: Input.usr,
-      password: Input.pwd,
-      phone: Input.phone,
-      region: RegionRef.value.getCity()
-    })
+  QUERY.post('api/user/register', {
+    username: Input.usr,
+    password: Input.pwd,
+    telephone: Input.phone,
+    register_city: RegionRef.value.getString()
   })
-  .then(res => res.json())
   .then(res => {
+    console.log(res)
     if(res.status == 0) {
+      alert('注册成功')
       Router.push('/login');
     } else {
       alert('注册失败');
     }
   })
-  .catch(err => alert(err));
+  .catch(err => alert(err))
 }
 
 

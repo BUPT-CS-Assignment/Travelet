@@ -45,6 +45,14 @@ export default defineConfig({
     ],
   },
   server: {
+    host: '0.0.0.0',
     port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:23333',   //代理接口
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
   },
 })

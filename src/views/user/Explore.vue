@@ -57,20 +57,31 @@
   />
 </div>
 <v-dialog 
+  min-width="400"
+  max-width="800"
+  persistent
+  transition="dialog-bottom-transition"
   v-model="Dialog"
-  width="85%"
-  height="80%"
->
-  <NewPost></NewPost>
+> 
+  <NewPost min-width="640" max-width="800"
+    :onCancel="()=>{Dialog=false;}"
+    :onComplete="()=>{Dialog=false;}"
+  ></NewPost>
 </v-dialog>
 </template>
 
 <script setup>
 import {ref, reactive} from 'vue';
+import { useRouter } from 'vue-router';
+
 import TagBar from '@/components/TagBar.vue'
 import Poster from '@/components/RequestPoster.vue';
 import NewPost from '@/components/NewPost.vue'
 import TagsPreset from '@/plugins/tags'
+import { onMounted } from 'vue';
+import * as QUERY from '@/plugins/query'
+
+const Router = useRouter();
 
 const PageLen = ref(1);
 const CurPage = ref(1);
@@ -82,6 +93,10 @@ const search_open = ref(false)
 function onTagChange(val) {
   console.log(val)
 }
+
+onMounted(() => {
+  QUERY.get('/api/user/request/query', )
+})
 
 
 </script>
