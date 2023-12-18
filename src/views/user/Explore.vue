@@ -49,7 +49,7 @@
     :length="PageLen"
   />
 </div>
-<v-dialog 
+<v-dialog style="backdrop-filter: blur(10px);"
   min-width="400"
   max-width="800"
   persistent

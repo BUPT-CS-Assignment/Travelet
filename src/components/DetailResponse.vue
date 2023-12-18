@@ -2,16 +2,52 @@
 <div class="pa-2">
   <!-- from -->
   <div class="d-flex align-center">
-    <v-avatar size="36" rounded="lg" color="grey">{{ Data.poster[0] }}</v-avatar>
-    <p class="text-subtitle-1 font-weight-bold ml-3">{{ Data.poster }}</p>
-    <p class="text-subtitle-2 font-weight-bold ml-auto"> {{ Data.date }}</p>
+    <v-avatar size="40" rounded="lg" color="grey">{{ Data.poster[0] }}</v-avatar>
+    <div class="d-flex flex-column justify-start align-start">
+      <p class="text-subtitle-1 font-weight-bold ml-3">{{ Data.poster }}</p>
+      <p class="text-caption text-grey-darken-2 ml-3"> {{ Data.date }}</p>
+    </div>
+    
+    <!-- buttons -->
+    <template v-if="props.modified">
+      <div class="ml-auto d-flex align-self-end">
+        <template v-if="Update">
+          <v-icon size="24" class="mr-4" @click="ImageInputRef.click()">
+            mdi-image-plus-outline
+          </v-icon>
+          <v-icon size="24" class="mr-2" @click="FileInputRef.click()">
+            mdi-folder-plus-outline
+          </v-icon>
+        </template>
+        <template v-else>
+          <v-icon color="red" size="24" class="mr-4" @click="">
+            mdi-trash-can-outline
+          </v-icon>
+          <v-icon size="24" class="mr-2" @click="Update = true">
+            mdi-pencil-outline
+          </v-icon>
+        </template>
+      </div>
+    </template>
+    
   </div>
 
   <!-- detail -->
   <div class="mt-2">
-    <p>
-      Data.desc
-    </p>
+    <template v-if="!Update">
+      <p> {{Data.desc}} </p>
+    </template>
+    <template v-else>
+      <v-textarea 
+        rounded="lg"
+        v-model="Input"
+        auto-grow
+        hide-details
+        variant="outlined"
+        class="mb-2"
+      />
+    </template>
+    
 
     <!-- images -->
     <div v-if="props.modified" class="d-flex">
@@ -20,12 +56,6 @@
         @change="(event) => handleFileInput(event, Data.images)"
         multiple
       />
-
-      <v-btn color="blue-accent-2" @click="ImageInputRef.click()" 
-        variant="flat" width="140" class="ml-auto"
-      >
-        添加图像  
-      </v-btn>
     </div>
     <v-row class="mt-4">
       <v-col v-for="(item, index) in Data.images" cols="auto">
@@ -49,12 +79,6 @@
         @change="(event) => FILES.handleFileInput(event, Data.files)"
         multiple
       />
-
-      <v-btn color="blue-accent-2" @click="FileInputRef.click()" 
-        variant="flat" width="140" class="ml-auto"
-      >
-        添加其他文件
-      </v-btn>
     </div>
     <v-list-item v-for="(file, index) in Data.files" :key="index"
       :title="file.name"
@@ -76,11 +100,18 @@
   </div>
 
   <!-- modify -->
-  <v-btn v-if="props.modified" color="blue-accent-2" @click="" 
-    variant="flat" width="100%" class="mt-2"
-  >
-    保存修改
-  </v-btn>
+  <template v-if="Update">
+    <div class="d-flex">
+      <v-btn color="red" variant="outlined" class="ml-auto" elevation="0" @click="cancel">
+        <p class="text-subtitle-1">取消</p>
+      </v-btn>
+      <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0"
+        :disabled="Input.length == 0" @click="upload">
+        <p class="text-subtitle-1">发布</p>
+      </v-btn>
+    </div>
+  </template>
+
   
   <!-- accept -->
   <template v-if="props.acceptable">
@@ -88,7 +119,7 @@
       <v-btn elevation="0" color="deep-orange" class="ml-2">
         <p class="text-subtitle-2 font-weight-bold">拒绝</p>
       </v-btn>
-      <v-btn elevation="0" color="green" class="ml-2">
+      <v-btn elevation="0" color="blue-accent-3" class="ml-2">
         <p class="text-subtitle-2 font-weight-bold">接受</p>
       </v-btn>
     </div>
@@ -117,6 +148,10 @@ const props = defineProps({
   }
 })
 
+const Update = ref(false);
+
+const Input = ref('')
+
 const Data = reactive({
   poster: 'USER',
   date: '2023/12/11',
@@ -127,6 +162,11 @@ const Data = reactive({
 
 const ImageInputRef = ref(null);
 const FileInputRef = ref(null);
+
+function cancel() {
+  Update.value = false
+  Input.value = Data.desc
+}
 
 onMounted(() => {
 

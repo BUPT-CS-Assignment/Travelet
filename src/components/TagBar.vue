@@ -7,7 +7,7 @@
     <template v-slot:prepend-inner>
       <v-btn :icon="props.icon" variant="text"
         color="grey"
-        @click="props.action"
+        @click="props.action(tags)"
       />
     </template>
     <template v-slot:selection="{ attrs, item, select, selected }">

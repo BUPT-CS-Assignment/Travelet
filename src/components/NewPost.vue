@@ -192,7 +192,7 @@ const Steps = ['Step1', 'Step2', 'Step3', 'Step4'];
 function updateImage(idx, file) {
   Input.image_data.push(null);
   FILES.sync_read(file ,(res) => {
-    Input.image_data[idx] = res;
+    Input.image_data[Input.image_data.length - 1] = res;
   });
 }
 

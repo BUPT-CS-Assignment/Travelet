@@ -3,7 +3,7 @@
   <div>
     <div class="d-flex flex-row">
       <p class="text-subtitle-1 font-weight-bold mb-2 ml-1">
-        响应内容
+        发布新响应
       </p>
       <v-icon size="24" class="ml-auto mr-4" @click="ImageInputRef.click()">
         mdi-image-plus-outline
@@ -26,25 +26,23 @@
   <div>
     <v-file-input ref="ImageInputRef"
       style="position: absolute;display: none;" accept="image/*"
-      @change="(event) => handleFileInput(event, Input.images)"
+      @change="(event) => FILES.handleFileInput(event, Input.images, updateImage)"
       multiple
     />
 
-    <v-row class="mt-4">
+    <v-row v-if="Input.images.length > 0" class="mt-4">
       <v-col v-for="(item, index) in Input.images" cols="auto">
-        <v-img :src="item.raw" aspect-ratio="1" cover min-width="200">
+        <v-img :src="Input.image_data[index]" aspect-ratio="1" cover min-width="200">
           <div class="d-flex">
             <v-btn icon="" variant="text" color="red" size="small" class="ml-auto"
-              @click="handleFileRemove(index, Input.images)"
+              @click="FILES.handleFileRemove(index, Input.images, removeImage)"
             >
               <v-icon size="large">mdi-close</v-icon>
             </v-btn>
           </div>
         </v-img>
       </v-col>
-    </v-row>
-
-    
+    </v-row>    
   </div>
 
   <!-- step 4 -->
@@ -52,23 +50,23 @@
     <v-file-input
       style="position: absolute;display: none;"
       ref="FileInputRef"
-      @change="(event) => handleFileInput(event, Input.files)"
+      @change="(event) => FILES.handleFileInput(event, Input.files)"
       multiple
     />
 
-    <v-list style="background: none;">
+    <v-list v-if="Input.files.length > 0" style="background: none;">
       <v-list-item v-for="(file, index) in Input.files" :key="index"
         :title="file.name"
-        :subtitle="formatFileSize(file.size)"
+        :subtitle="FILES.formatFileSize(file.size)"
       >
         <template v-slot:prepend>
           <v-icon color="grey-darken-3">
-            {{ iconFileType(file.type) }}
+            {{ FILES.iconFileType(file.type) }}
           </v-icon>
         </template>
         <template v-slot:append>
           <v-btn icon="" variant="text" color="red" size="small"
-            @click="handleFileRemove(index, Input.files)"
+            @click="FILES.handleFileRemove(index, Input.files)"
           >
             <v-icon size="large">mdi-close</v-icon>
           </v-btn>
@@ -78,16 +76,29 @@
   </div>
 
   <!-- actions -->
-  <v-btn @click="props.onCancel" class="ml-auto mr-4" variant="text" color="red" width="80">
-    <p class="text-subtitle-1 font-weight-bold">取消</p>
-  </v-btn>
+  <div class="d-flex">
+    <v-btn color="red" variant="outlined" class="ml-auto" elevation="0" @click="props.onCancel">
+      <p class="text-subtitle-1">取消</p>
+    </v-btn>
+    <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0"
+      :disabled="!Input.desc.length > 0" @click="upload">
+      <p class="text-subtitle-1">发布</p>
+    </v-btn>
+  </div>
+
 
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue';
+import * as FILES from '@/plugins/files'
+import * as QUERY from '@/plugins/query'
 
 const props = defineProps({
+  request: {
+    type: String,
+    required: true,
+  },
   onCancel: {
     type: Function,
     default: () => {},
@@ -99,70 +110,57 @@ const props = defineProps({
 })
 
 const Input = reactive({
-  desc: 'Description',
+  desc: '',
   images: [],
   files: [],
+  image_data: [],
 })
 
 const ImageInputRef = ref(null);
 const FileInputRef = ref(null);
 
-
-function handleFileInput(event, dest) {
-  const files = event.target.files;
-  for (let i = 0; i < files.length; i++) {
-    var file = files[i];
-    const reader = new FileReader();
-    reader.onload = () => {
-      file['raw'] = reader.result;
-      dest.push(file);
-    }
-    reader.readAsDataURL(file);
-  }
+function updateImage(idx, file) {
+  Input.image_data.push(null);
+  FILES.sync_read(file ,(res) => {
+    Input.image_data[Input.image_data.length - 1] = res;
+  });
 }
 
-function handleFileRemove(idx, dest) {
-  dest.splice(idx, 1);
+function removeImage(idx) {
+  Input.image_data.splice(idx, 1);
 }
 
-function formatFileSize(size) {
-  if (size === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-  const i = Math.floor(Math.log(size) / Math.log(k));
-  return parseFloat((size / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
 
-const FileIconMap = {
-  image: 'mdi-image',
-  video: 'mdi-play-box',
-  audio: 'mdi-music-box',
-  text: 'mdi-text-box',
-  application: 'mdi-file',
-}
-
-function iconFileType(ftype) {
-  const t = String(ftype).split('/')[0];
-  if(t in FileIconMap) return FileIconMap[t];
-  else return 'mdi-file-question';
-}
 
 function upload() {
   const formData = new FormData();
   // desc
-  formData.append('desc', Input.desc);
-  formData.append('region', city);
+  formData.append('description', Input.desc);
+  // request id
+  formData.append('request_id', props.request);
+  // responder
+  formData.append('responder_id', QUERY.get_user_id());
   // images
   for (let i = 0; i < Input.images.length; i++) {
     const file = Input.images[i];
-    formData.append('files[]', file);
+    formData.append('image_files', file);
   }
   // files
   for (let i = 0; i < Input.files.length; i++) {
     const file = Input.files[i];
-    formData.append('files[]', file);
+    formData.append('raw_files', file);
   }
 
+  // post
+  QUERY.post('/api/user/response/post', formData, null, false)
+  .then(res => {
+    if(res.status == 0) {
+      alert('发布成功');
+      props.onComplete();
+    } else {
+      alert(res.message)
+    }
+  })
 }
 
 </script>

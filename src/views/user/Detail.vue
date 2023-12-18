@@ -23,7 +23,7 @@
         style="max-width: 400px;"
       >
         <!-- title -->
-        <p class="text-h3" style="word-break: break-all;">
+        <p class="text-h3 font-weight-bold mb-2" style="word-break: break-all;">
           {{ Request.biref }}
         </p>
 
@@ -63,11 +63,13 @@
         <v-carousel v-if="Request.images.length > 0"
           cycle show-arrows="hover"
           hide-delimiter-background
-          height="300"
+          height="200"
         >
-          <v-carousel-item v-for="(uid, index) in Request.images">
-            <v-img :src="QUERY.fileURL(uid)" cover :no-transition="true"
+          <v-carousel-item v-for="(item, index) in Request.images">
+            <v-img :src="QUERY.fileURL(item.id)"
+              class="mt-auto"
               lazy-src="https://fakeimg.pl/400x300/?retina=1&text=image&font=lobster"
+              @click="checkImage(item.id)"
             ></v-img>
           </v-carousel-item>
 
@@ -88,10 +90,11 @@
       </v-card-text>
     </v-card>
 
-    <v-divider class="my-4"/>
+    
 
     <!-- personal response -->
-    <template v-if="!is_poster && Reponse.personal">
+    <template v-if="!is_poster && Response.personal">
+      <v-divider class="my-4"/>
       <p class="ml-2 text-h6 font-weight-bold">我的响应</p>
       <detail-response 
         :uid="Response.personal" 
@@ -99,32 +102,37 @@
       />
     </template>
     <template v-else-if="!is_poster && Request.status == 0">
-      <template v-if="!Dialog">
+      <template v-if="!Dialog && Loaded">
+        <v-divider class="my-4"/>
         <v-btn class="mb-4" elevation="0" color="blue-accent-2" @click="Dialog = true">
-        去响应
-      </v-btn>
+          去响应
+        </v-btn>
       </template>
-      <template v-else>
+      <template v-else-if="Dialog">
+        <v-divider class="my-4"/>
         <NewResponse
+          :request="POST_ID"
           :onCancel="()=>{Dialog=false;}"
           :onComplete="()=>{Dialog=false;}"
         ></NewResponse>
       </template>
     </template>
     
-    <v-divider class="my-6"/>
+    
 
     <!-- all responses -->
     <div>
       <template v-for="(uid, index) in Response.rest">
+        <v-divider class="my-6"/>
         <div>
-          <detail-response :uid="uid" :acceptable="is_poster"></detail-response>
-          <v-divider v-if="index != Response.length - 1" class="my-3"/>
+          <detail-response :uid="Number(uid)" :acceptable="is_poster"></detail-response>
         </div>
       </template>
     </div>
   </div>
 </div>
+
+<check-dialog ref="CheckRef" />
 </template>
 
 <script setup>
@@ -132,6 +140,7 @@ import { ref, reactive, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import DetailResponse from '@/components/DetailResponse.vue'
 import NewResponse from '@/components/NewResponse.vue';
+import CheckDialog from '@/components/CheckImage.vue';
 import * as FILES from '@/plugins/files'
 import * as QUERY from '@/plugins/query'
 
@@ -143,44 +152,49 @@ const StatusString = [
   {text:'进行中', color:'green'},
   {text:'已完成', color:'blue-accent-3'},
   {text:'已取消', color:'red'},
-  {text:'已过期', color:'grey'}
+  {text:'已过期', color:'grey'},
+  {text:'加载中', color:'grey'}
 ]
 
 const Request = reactive({
-  poster_id: -1,
+  poster_id: NaN,
   location: '',
   tags: [],
   create_time: '',
   modify_time: '',
   biref: '',
   desc: '',
-  status: 0,
+  status: 4,
   images: [],
   files: []
 })
 
 const Dialog = ref(false);
-
-const Response = reactive([1,2,3,4])
+const Loaded = ref(false);
+const CheckRef = ref(null);
 
 const is_poster = computed(() => {
-  return QUERY.get_user_id() === Request.poster_id;
+  return QUERY.get_user_id() == Request.poster_id;
 })
 
-const Reponse = reactive({
-  personal: undefined,
-  accepted: undefined,
+const Response = reactive({
+  personal: NaN,
+  accepted: NaN,
   rest: []
 })
 
+function checkImage(idx) {
+  CheckRef.value.check(idx);
+}
+
 function filterResponse(data) {
-  Reponse.personal = undefined;
-  Reponse.rest = []
+  Response.personal = NaN;
+  Response.rest = []
   data.forEach(element => {
     if(element.responder_id == QUERY.get_user_id()) {
-      Reponse.personal = element.id;
-    } else if(element.id != Reponse.accepted) {
-      Reponse.rest.push(element.id);
+      Response.personal = element.id;
+    } else if(element.id != Response.accepted) {
+      Response.rest.push(element.id);
     }
   });
 }
@@ -202,9 +216,9 @@ onMounted(() => {
     Request.status = info.status;
     Request.images = info.image_files;
     Request.files = info.raw_files;
-    Response.splice(0, Response.length);
-    Reponse.accepted = info.accepted_response_id;
+    Response.accepted = info.accepted_response_id;
     filterResponse(info.pending_responses);
+    Loaded.value = true;
   })
 })
 
