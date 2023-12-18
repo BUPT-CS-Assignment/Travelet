@@ -7,7 +7,7 @@
 
   <!-- data num -->
   <p class="align-self-center text-body-2 text-grey-darken-2">
-    {{ UserData.loc1 }}, {{ UserData.loc2 }}
+    {{ City }}
   </p>
 
     <!-- search bar -->
@@ -48,22 +48,37 @@ import {ref, reactive} from 'vue';
 import TagBar from '@/components/TagBar.vue'
 import Poster from '@/components/ResponsePoster.vue';
 import TagsPreset from '@/plugins/tags'
+import * as QUERY from '@/plugins/query'
+import { onMounted } from 'vue';
 
 const PageLen = ref(1);
 const CurPage = ref(1);
 
-const UserData = reactive({
-  loc1: '北京市',
-  loc2: '海淀区',
-})
+const City = ref('')
 
-
-const search_open = ref(false)
+function search(page=1, str='') {
+  QUERY.get('/api/user/response/query_brief', {
+    city: City.value,
+    str: str,
+    page: page
+  })
+  .then(data => {
+    console.log(data)
+  })
+}
 
 function onTagChange(val) {
   console.log(val)
 }
 
+onMounted(() => {
+  QUERY.get('/api/user/info', {}, 'user_id')
+  .then(data => {
+    let citys = String(data.data.register_city)
+    City.value = citys;
+    search();
+  })
+})
 
 
 </script>

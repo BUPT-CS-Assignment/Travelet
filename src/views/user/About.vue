@@ -210,7 +210,7 @@
           <p class="text-subtitle-1">取消</p>
         </v-btn>
         <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0"
-          @click="postUpdate"
+          :disabled="!assert2" @click="postUpdate"
         >
           <p class="text-subtitle-1">确认</p>
         </v-btn>
@@ -287,8 +287,37 @@ function resetUpdate() {
   Update.value = false;
 }
 
-function postUpdate() {
+const assert2 = computed(() => {
+  return rules.lim(Input.phone) === true &&
+         (Input.phone !== UserData.phone ||
+         Input.intro !== UserData.intro);
+})
 
+function postUpdate() {
+  if(!assert2) {
+    alert('请检查输入');
+    return;
+  }
+
+  let data = {}
+  if(Input.phone !== UserData.phone) data.telephone = Input.phone;
+  if(Input.intro !== UserData.intro) data.description = Input.intro;
+
+  if(data == {}) {
+    alert('没有修改任何信息');
+    return;
+  }
+
+  QUERY.post('/api/user/modify_data', data, 'user_id')
+  .then(data => {
+    if(data.code == 0) {
+      alert('修改成功');
+      UserData.phone = Input.phone;
+      UserData.intro = Input.intro;
+      resetUpdate();
+    }
+    else alert('修改失败');
+  })
 }
 
 function resetChange() {
@@ -300,7 +329,21 @@ function resetChange() {
 }
 
 function postChange() {
+  if(!assert) {
+    alert('请检查输入');
+    return;
+  }
 
+  QUERY.post('/api/usr/modify_data', {
+    password: Input.pwd
+  }, 'user_id')
+  .then(data => {
+    if(data.code == 0) {
+      alert('修改成功');
+      resetChange();
+    }
+    else alert('修改失败');
+  })
 }
 
 const assert = computed(() => {
@@ -320,9 +363,8 @@ onMounted(() => {
     UserData.loc2 = citys[1]
     UserData.phone = data.data.telephone
     UserData.intro = data.data.description ? data.data.description : ''
-
-    Input.phone = UserData.phone;
-    Input.intro = UserData.intro;
+    resetUpdate();
+    resetChange();
   })
 })
 </script>
