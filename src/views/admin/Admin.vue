@@ -1,9 +1,9 @@
 <template>
   <div class="main-container">
     <div class="container">
-      <el-date-picker class="element" v-model="start_month" type="month" @change="handleChange"></el-date-picker>
+      <el-date-picker class="element" v-model="start_month" type="month" @change="handleChange" value-format="YYYY-MM"></el-date-picker>
       <div class="element">~</div>
-      <el-date-picker class="element" v-model="end_month" type="month" @change="handleChange"></el-date-picker>
+      <el-date-picker class="element" v-model="end_month" type="month" @change="handleChange" value-format="YYYY-MM"></el-date-picker>
       <div class="tag-location-picker ml-auto">
         <el-select v-model="current_tag" placeholder="标签" class="combo-box" @change="handleChange">
           <el-option v-for="tag in tagOptions" :key="tag" :label="tag" :value="tag"></el-option>
@@ -64,11 +64,13 @@ import * as QUERY from '@/plugins/query'
 import CITIES from '@/plugins/cities'
 import {assert} from '@/plugins/query'
 
-const fetchandProcessBillData = async (currentTag, currentLocation) => {
+const fetchandProcessBillData = async (currentTag, currentLocation, startTime, endTime) => {
   // Fetch bill data
   const billData = await QUERY.post('/api/admin/query/bill', {
     tag: currentTag,
     location: currentLocation,
+    start_time: startTime,
+    end_time: endTime,
   });
 
   // Process bill data
@@ -89,17 +91,17 @@ export default {
     const Router = useRouter();
     const current_tag = ref('bad');
     const current_location = ref('北京市，海淀区');
-    const start_month = ref('2020-01');
+    const start_month = ref('2023-09');
     const end_month = ref('2023-12');
     const tagOptions = ref([]);
     const cities = ref([]);
     const filteredBills = ref([]);
     const headers = ref([
-      { title: 'Id' },
-      { title: 'Year' },
-      { title: 'Month' },
-      { title: 'Amount' },
-      { title: 'Profit' }
+      { title: 'Id', value: 'id' },
+      { title: 'Year', value: 'year' },
+      { title: 'Month', value: 'month' },
+      { title: 'Amount', value: 'amount' },
+      { title: 'Profit', value: 'profit' }
     ]);
     
     Object.keys(CITIES).forEach((province) => {
@@ -120,10 +122,11 @@ export default {
 
       const sortedBills = await fetchandProcessBillData(
         current_tag.value,
-        current_location.value
+        current_location.value,
+        start_month.value,
+        end_month.value
       );
       
-      console.log(sortedBills);
       filteredBills.value = sortedBills.map(item => {
         const filteredItem = {};
         headers.value.forEach(header => {
@@ -132,7 +135,7 @@ export default {
         });
         return filteredItem;
       });
-
+      console.log(filteredBills);
       // Initialize and configure echarts
       const myChart = echarts.init(document.getElementById('chart'));
       const option = {
@@ -178,7 +181,9 @@ export default {
     async handleChange() {
       const sortedBills = await this.fetchandProcessBillData(
         this.current_tag,
-        this.current_location
+        this.current_location,
+        this.start_month,
+        this.end_month
       );
 
       // Update filteredBills

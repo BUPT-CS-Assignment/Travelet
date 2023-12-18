@@ -28,6 +28,7 @@
     <v-divider class="my-6" />
     <TagBar class="align-self-center mb-4" style="height: 90px;"
       :tags="TagsPreset"
+      :action="doSearch"
     />
   </div>
 
@@ -81,6 +82,22 @@ const CurPage = ref(1);
 const Dialog = ref(false);
 
 const Posts = reactive({})
+
+function doSearch(tags){
+  Object.keys(Posts).forEach(key => {
+    delete Posts[key];
+  })
+  QUERY.get('/api/user/request/query_brief', {
+    page : CurPage.value,
+    str : tags.join(' '),
+  }, 'poster_id')
+  .then(data => {
+    console.log(data)
+    data.data.forEach(element => {
+      Posts[element.id] = element
+    });
+  }) 
+}
 
 function refresh() {
   QUERY.get('/api/user/request/query_brief', {

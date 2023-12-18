@@ -14,6 +14,7 @@
       <v-divider class="my-6" />
       <TagBar class="align-self-center mb-4" style="height: 90px;"
         :tags="TagsPreset"
+        :action="doSearch"
       />
     </div>
 
@@ -79,5 +80,20 @@ onMounted(() => {
   })
 })
 
+function doSearch(tags){
+  Object.keys(Posts).forEach(key => {
+    delete Posts[key];
+  })
+  QUERY.get('/api/user/request/query_brief', {
+    page : CurPage.value,
+    city: City.value,
+    str : tags.join(' '),
+  }, 'poster_id')
+  .then(data => {
+    data.data.forEach(element => {
+      Posts[element.id] = element
+    });
+  }) 
+}
 
 </script>
