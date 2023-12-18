@@ -102,7 +102,10 @@ function login() {
     if(res.status == 0){
       QUERY.set_user_name(Input.usr);
       QUERY.set_user_id(res.user_id);
-      Router.push('/home');
+      if(username == 'admin')
+        Router.push('/admin');
+      else
+        Router.push('/home');
     }
     else alert('用户名或密码错误');
   })
