@@ -44,7 +44,7 @@
 <script setup>
 import {ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import Logo from '@/components/Logo.vue'
+import Logo from '@/components/Logo.vue';
 
 const Router = useRouter();
 
@@ -73,7 +73,7 @@ function targetTo(key) {
 }
 
 function logout() {
-
+  Router.push('/login');
 }
 
 onMounted(() => {

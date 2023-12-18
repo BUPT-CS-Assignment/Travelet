@@ -65,8 +65,8 @@
           hide-delimiter-background
           height="300"
         >
-          <v-carousel-item v-for="(uid, index) in Request.images">
-            <v-img :src="QUERY.fileURL(uid)" cover :no-transition="true"
+          <v-carousel-item v-for="(item, index) in Request.images">
+            <v-img :src="QUERY.fileURL(item.id)" cover :no-transition="true"
               lazy-src="https://fakeimg.pl/400x300/?retina=1&text=image&font=lobster"
             ></v-img>
           </v-carousel-item>
