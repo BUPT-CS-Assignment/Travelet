@@ -65,7 +65,7 @@
   </div>
 
   <!-- user info -->
-  <div class="d-flex flex-column align-self-start mt-6" 
+  <div class="d-flex flex-column align-self-start mt-6 mr-auto" 
     style="width: 33%; min-width: 300px"
   >
     <!-- Password change -->
@@ -166,7 +166,8 @@
           :rules="[rules.required, rules.lim]"
           v-model="Input.phone"
           prepend-inner-icon="mdi-cellphone-link"
-          type="text"
+          type="number"
+          hide-spin-buttons
         />
       </template>
     </div>
@@ -358,9 +359,9 @@ const assert = computed(() => {
 onMounted(() => {
   QUERY.get('/api/user/info', {}, 'user_id')
   .then(data => {
-    let citys = String(data.data.register_city).split(',')
-    UserData.loc1 = citys[0]
-    UserData.loc2 = citys[1]
+    let cities = String(data.data.register_city).split(',')
+    UserData.loc1 = cities[0]
+    UserData.loc2 = cities[1]
     UserData.phone = data.data.telephone
     UserData.intro = data.data.description ? data.data.description : ''
     resetUpdate();

@@ -1,10 +1,10 @@
 <template>
-<div class="pa-2">
+<div class="pa-2" style="width: 100%;">
   <!-- from -->
   <div class="d-flex align-center">
-    <v-avatar size="40" rounded="lg" color="grey">{{ Data.poster[0] }}</v-avatar>
+    <v-avatar size="40" rounded="lg" color="grey">{{ Data.name.length > 0 ? Data.name[0] : '' }}</v-avatar>
     <div class="d-flex flex-column justify-start align-start">
-      <p class="text-subtitle-1 font-weight-bold ml-3">{{ Data.poster }}</p>
+      <p class="text-subtitle-1 font-weight-bold ml-3">{{ Data.name }}</p>
       <p class="text-caption text-grey-darken-2 ml-3"> {{ Data.date }}</p>
     </div>
     
@@ -20,7 +20,7 @@
           </v-icon>
         </template>
         <template v-else>
-          <v-icon color="red" size="24" class="mr-4" @click="">
+          <v-icon color="red" size="24" class="mr-4" @click="remove">
             mdi-trash-can-outline
           </v-icon>
           <v-icon size="24" class="mr-2" @click="Update = true">
@@ -35,7 +35,7 @@
   <!-- detail -->
   <div class="mt-2">
     <template v-if="!Update">
-      <p> {{Data.desc}} </p>
+      <p style="word-break: break-all;"> {{Data.desc}} </p>
     </template>
     <template v-else>
       <v-textarea 
@@ -59,7 +59,13 @@
     </div>
     <v-row class="mt-4">
       <v-col v-for="(item, index) in Data.images" cols="auto">
-        <v-img :src="item.raw" aspect-ratio="1" cover min-width="160">
+        <v-img @click="checkImage(item.id)"
+          :src="QUERY.fileURL(item.id)" 
+          aspect-ratio="1" 
+          cover 
+          min-width="160"
+          lazy-src="https://fakeimg.pl/300x300/?retina=1&text=image&font=lobster"
+        >
           <div v-if="props.modified" class="d-flex">
             <v-btn icon="" variant="text" color="red" size="small" class="ml-auto"
               @click="handleFileRemove(index, Data.images)"
@@ -125,11 +131,12 @@
     </div>
   </template>
 </div>
-
+<check-view ref="CheckRef" />
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
+import CheckView from '@/components/CheckImage.vue';
 import * as FILES from '@/plugins/files'
 import * as QUERY from '@/plugins/query'
 
@@ -149,13 +156,14 @@ const props = defineProps({
 })
 
 const Update = ref(false);
-
+const CheckRef = ref(null);
 const Input = ref('')
 
 const Data = reactive({
-  poster: 'USER',
-  date: '2023/12/11',
-  desc: 'description',
+  uid: NaN,
+  name: '',
+  date: '',
+  desc: '',
   images: [],
   files: []
 })
@@ -168,7 +176,55 @@ function cancel() {
   Input.value = Data.desc
 }
 
-onMounted(() => {
+function upload() {
 
+}
+
+function checkImage(idx) {
+  CheckRef.value.check(idx);
+}
+
+function remove() {
+  QUERY.post('/api/user/response/delete', {
+    response_id: props.uid
+  })
+  .then(data => {
+    console.log(data)
+    if(data.status == 0) {
+      alert('删除成功');
+      window.location.reload();
+    } else {
+      alert(data.message)
+    }
+  })
+}
+
+function getData() {
+  QUERY.get('/api/user/response/query_detail',{
+    response_id : props.uid
+  })
+  .then(data => {
+    const info = data.data;
+    console.log(info)
+    Data.uid = info.responder_id;
+
+    QUERY.get('/api/user/info', {
+      'user_id' : info.responder_id
+    })
+    .then(data => {
+      const basic = data.data;
+      console.log(basic)
+      Data.name = basic.username;
+      Data.date = info.modify_time;
+      Data.desc = info.description;
+      Data.images = info.image_files;
+      Data.files = info.raw_files;
+      Input.value = Data.desc;
+    })
+  })
+}
+
+onMounted(() => {
+  getData();
 })
 </script>

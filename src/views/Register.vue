@@ -29,7 +29,8 @@
         :rules="[rules.required, rules.lim]"
         v-model="Input.phone"
         prepend-inner-icon="mdi-cellphone-link"
-        type="text"
+        type="number"
+        hide-spin-buttons
       />
 
       <!-- password -->

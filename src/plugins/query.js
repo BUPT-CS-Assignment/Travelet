@@ -14,6 +14,16 @@ function set_user_id(uid) {
   localStorage.setItem('userid', uid);
 }
 
+function clear() {
+  localStorage.removeItem('userid');
+  localStorage.removeItem('username');
+}
+
+function assert() {
+  return localStorage.getItem('userid') !== null &&
+         localStorage.getItem('username') !== null;
+}
+
 function fileURL(uid) {
   return '/api/file/download/' + String(uid)
 }
@@ -72,4 +82,4 @@ function post(url, data, identifier = null, json = true, headers = {}) {
   })
 }
 
-export {get, post, fileURL, set_user_id, get_user_id, set_user_name, get_user_name}
+export {get, post, fileURL, set_user_id, get_user_id, set_user_name, get_user_name, clear, assert}

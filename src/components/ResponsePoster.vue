@@ -33,8 +33,8 @@
         <v-spacer class="my-1"></v-spacer>
 
         <!-- date -->
-        <p class="text-blue-accent-2 text-caption">
-          POSTED: {{ Data.date }}
+        <p class="text-blue-accent-2 text-body-2 mt-4 mb-2">
+          {{ Data.date }}
         </p>
 
         <v-spacer class="my-1"></v-spacer>
@@ -57,6 +57,7 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import * as QUERY from '@/plugins/query'
 
 const Router = useRouter();
 

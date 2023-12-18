@@ -45,6 +45,7 @@
 import {ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Logo from '@/components/Logo.vue';
+import {assert, clear} from '@/plugins/query'
 
 const Router = useRouter();
 
@@ -73,11 +74,15 @@ function targetTo(key) {
 }
 
 function logout() {
+  clear();
   Router.push('/login');
 }
 
 onMounted(() => {
-  // targetTo('about');
+  if(!assert()) {
+    Router.push('/login');
+    return;
+  }
 })
 
 </script>

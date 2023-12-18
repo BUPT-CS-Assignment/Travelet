@@ -23,9 +23,9 @@
 
 <script setup>
 import { reactive, ref, toRaw } from 'vue';
-import CITYS from '@/plugins/citys'
+import CITIES from '@/plugins/cities'
 
-const provinces = Object.keys(CITYS);
+const provinces = Object.keys(CITIES);
 let cities = ref([])
 
 const Input = reactive({
@@ -35,7 +35,7 @@ const Input = reactive({
 
 function updateCities() {
   Input.loc2 = ''
-  cities.value = CITYS[toRaw(Input).loc1]
+  cities.value = CITIES[toRaw(Input).loc1]
 }
 
 defineExpose({

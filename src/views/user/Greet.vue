@@ -27,7 +27,7 @@
   <!-- post content -->
   <div class="my-2">
     <v-row>
-      <v-col v-for="(value, key) in Posts" class="ma-2">
+      <v-col v-for="(value, key) in Posts" justify="center">
         <poster :id="Number(key)" :data="value"/>
       </v-col>
     </v-row>
@@ -70,9 +70,6 @@ function search(page=1) {
   })
 }
 
-function onTagChange(val) {
-  console.log(val)
-}
 
 onMounted(() => {
   QUERY.get('/api/user/info', {}, 'user_id')

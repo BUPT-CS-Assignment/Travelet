@@ -1,4 +1,4 @@
-const CITYS = {
+const CITIES = {
   "北京市": [
     "东城区",
     "西城区",
@@ -514,4 +514,4 @@ const CITYS = {
   ]
 }
 
-export default CITYS;
+export default CITIES;

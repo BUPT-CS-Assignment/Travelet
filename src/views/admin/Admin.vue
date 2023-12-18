@@ -57,10 +57,12 @@
 </style>
 
 <script>
-import * as echarts from 'echarts';
-import { ref, reactive, onMounted } from 'vue';
-import * as QUERY from '@/plugins/query';
-import CITYS from '@/plugins/citys';
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router';
+import * as echarts from 'echarts'
+import * as QUERY from '@/plugins/query'
+import CITIES from '@/plugins/cities'
+import {assert} from '@/plugins/query'
 
 const fetchandProcessBillData = async (currentTag, currentLocation) => {
   // Fetch bill data
@@ -84,6 +86,7 @@ const fetchandProcessBillData = async (currentTag, currentLocation) => {
 export default {
   setup() {
     // Reactive properties
+    const Router = useRouter();
     const current_tag = ref('bad');
     const current_location = ref('北京市，海淀区');
     const start_month = ref('2020-01');
@@ -99,14 +102,18 @@ export default {
       { title: 'Profit' }
     ]);
     
-    Object.keys(CITYS).forEach((province) => {
-      CITYS[province].forEach((city) => {
+    Object.keys(CITIES).forEach((province) => {
+      CITIES[province].forEach((city) => {
         cities.value.push(province + '，' + city);
       });
     });
 
     // On mounted lifecycle hook
     onMounted(async () => {
+      if(!assert()) {
+        Router.push('/login');
+        return;
+      }
       // Fetch tag options
       const tagData = await QUERY.post('/api/common/query/tags');
       tagOptions.value = tagData.data;

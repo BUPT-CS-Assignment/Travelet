@@ -1,6 +1,6 @@
 <template>
 <div class="d-flex justify-center">
-  <div class="d-flex flex-column py-10" style="max-width: 1000px;">
+  <div class="d-flex flex-column py-10" style="max-width: 800px;">
     <!-- status & location -->
     <div class="d-flex flex-row mb-3">
       <v-chip label variant="flat" 
@@ -67,7 +67,6 @@
         >
           <v-carousel-item v-for="(item, index) in Request.images">
             <v-img :src="QUERY.fileURL(item.id)"
-              class="mt-auto"
               lazy-src="https://fakeimg.pl/400x300/?retina=1&text=image&font=lobster"
               @click="checkImage(item.id)"
             ></v-img>
@@ -122,8 +121,9 @@
 
     <!-- all responses -->
     <div>
+      <p class="ml-2 mt-10 text-h6 font-weight-bold">所有响应</p>
       <template v-for="(uid, index) in Response.rest">
-        <v-divider class="my-6"/>
+        <v-divider class="my-3"/>
         <div>
           <detail-response :uid="Number(uid)" :acceptable="is_poster"></detail-response>
         </div>
@@ -137,16 +137,18 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter  } from 'vue-router';
 import DetailResponse from '@/components/DetailResponse.vue'
 import NewResponse from '@/components/NewResponse.vue';
 import CheckDialog from '@/components/CheckImage.vue';
 import * as FILES from '@/plugins/files'
 import * as QUERY from '@/plugins/query'
+import {assert} from '@/plugins/query'
 
 
 const Route = useRoute();
 const POST_ID = Route.params.id;
+const Router = useRouter();
 
 const StatusString = [
   {text:'进行中', color:'green'},
@@ -200,6 +202,11 @@ function filterResponse(data) {
 }
 
 onMounted(() => {
+  if(!assert()) {
+    Router.push('/login');
+    return;
+  }
+  
   QUERY.get('/api/user/request/query_detail',{
     request_id : POST_ID
   })
