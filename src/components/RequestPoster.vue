@@ -107,7 +107,7 @@ function randomImage() {
   const len = props.data.image_files.length;
   if(len == 0) return null;
   const index = getRandomInt(len - 1);
-  return QUERY.fileURL(props.data.image_files[index]);
+  return QUERY.fileURL(props.data.image_files[index].id);
 }
 
 function checkDetail() {

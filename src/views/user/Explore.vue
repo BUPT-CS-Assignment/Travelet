@@ -85,9 +85,9 @@ const Posts = reactive({})
 function refresh() {
   QUERY.get('/api/user/request/query_brief', {
     page : 1,
-    str : ""
   }, 'poster_id')
   .then(data => {
+    console.log(data)
     data.data.forEach(element => {
       Posts[element.id] = element
     });

@@ -6,11 +6,11 @@
       min-width=400 max-width=800 
       v-bind="props"
       :elevation="isHovering ? 6 : 1"
-      @click=""
+      @click="checkDetail"
     >
-      <v-img :src="Data.imgs[0]"
+      <v-img :src="Data.img"
+        lazy-src="https://fakeimg.pl/400x300/?retina=1&text=image&font=lobster"
         aspect-ratio="4/3"
-        
       />
       
       <!-- content -->
@@ -56,32 +56,49 @@
 
 <script setup>
 import { ref, reactive } from 'vue';
+import { useRouter } from 'vue-router';
 
+const Router = useRouter();
 
 const props = defineProps({
-  type: {
-    type: String,
-    default: 'region',
-    validator: (val) => {
-      return ['region', 'keyword'].includes(val)
-    }
+  id: {
+    type: Number,
+    required: true
+  },
+  data: {
+    type: Object,
+    required: true
   }
 })
+
+const StatusString = [
+  {text:'进行中', color:'green'},
+  {text:'已完成', color:'blue-accent-3'},
+  {text:'已取消', color:'red'},
+  {text:'已过期', color:'grey'}
+]
+
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-
 const Data = reactive({
-  tags: ['tag1','tag2'],
-  date: '2023.11.28',
-  biref: 'Brief Description',
-  imgs: ['https://cdn.vuetifyjs.com/images/cards/house.jpg', 
-    'https://cdn.vuetifyjs.com/images/cards/road.jpg',
-    'https://cdn.vuetifyjs.com/images/cards/plane.jpg'
-  ],
+  tags: props.data.tags,
+  date: props.data.create_time,
+  biref: props.data.description,
+  status: props.data.status,
+  img: randomImage(),
 })
 
+function randomImage() {
+  const len = props.data.image_files.length;
+  if(len == 0) return null;
+  const index = getRandomInt(len - 1);
+  return QUERY.fileURL(props.data.image_files[index].id);
+}
 
+function checkDetail() {
+  Router.push('/home/detail/' + props.id)
+}
 </script>

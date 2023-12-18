@@ -29,7 +29,7 @@
         </template>
       </v-hover>
 
-      <v-btn icon="mdi-logout-variant" color="grey-darken-3"></v-btn>
+      <v-btn icon="mdi-logout-variant" color="grey-darken-3" @click="logout"></v-btn>
     </template>
   </v-app-bar>
 
@@ -44,7 +44,7 @@
 <script setup>
 import {ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import Logo from '@/components/Logo.vue'
+import Logo from '@/components/Logo.vue';
 
 const Router = useRouter();
 
@@ -70,6 +70,10 @@ const Selected = ref('about');
 function targetTo(key) {
   Selected.value = key;
   Router.push('/home' + Targets[key].link);
+}
+
+function logout() {
+  Router.push('/login');
 }
 
 onMounted(() => {
