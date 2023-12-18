@@ -310,7 +310,7 @@ function postUpdate() {
 
   QUERY.post('/api/user/modify_data', data, 'user_id')
   .then(data => {
-    if(data.code == 0) {
+    if(data.status == 0) {
       alert('修改成功');
       UserData.phone = Input.phone;
       UserData.intro = Input.intro;
@@ -334,11 +334,11 @@ function postChange() {
     return;
   }
 
-  QUERY.post('/api/usr/modify_data', {
+  QUERY.post('/api/user/modify_data', {
     password: Input.pwd
   }, 'user_id')
   .then(data => {
-    if(data.code == 0) {
+    if(data.status == 0) {
       alert('修改成功');
       resetChange();
     }
