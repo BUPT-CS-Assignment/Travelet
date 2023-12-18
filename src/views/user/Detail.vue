@@ -91,23 +91,34 @@
     <v-divider class="my-4"/>
 
     <!-- personal response -->
-    <template v-if="1 in Response">
+    <template v-if="!is_poster && Reponse.personal">
       <p class="ml-2 text-h6 font-weight-bold">我的响应</p>
-      <detail-response :uid="1" :modified="true"></detail-response>
+      <detail-response 
+        :uid="Response.personal" 
+        :modified="Request.status == 0"
+      />
     </template>
-    <template v-else>
-      <v-btn class="mb-4" elevation="0" color="blue-accent-2">
+    <template v-else-if="!is_poster && Request.status == 0">
+      <template v-if="!Dialog">
+        <v-btn class="mb-4" elevation="0" color="blue-accent-2" @click="Dialog = true">
         去响应
       </v-btn>
+      </template>
+      <template v-else>
+        <NewResponse
+          :onCancel="()=>{Dialog=false;}"
+          :onComplete="()=>{Dialog=false;}"
+        ></NewResponse>
+      </template>
     </template>
     
     <v-divider class="my-6"/>
 
     <!-- all responses -->
     <div>
-      <template v-for="(uid, index) in Response">
-        <div v-if="uid != 1">
-          <detail-response :uid="uid" :acceptable="true"></detail-response>
+      <template v-for="(uid, index) in Response.rest">
+        <div>
+          <detail-response :uid="uid" :acceptable="is_poster"></detail-response>
           <v-divider v-if="index != Response.length - 1" class="my-3"/>
         </div>
       </template>
@@ -117,12 +128,12 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import DetailResponse from '@/components/DetailResponse.vue'
+import NewResponse from '@/components/NewResponse.vue';
 import * as FILES from '@/plugins/files'
 import * as QUERY from '@/plugins/query'
-import { onMounted } from 'vue';
 
 
 const Route = useRoute();
@@ -136,6 +147,7 @@ const StatusString = [
 ]
 
 const Request = reactive({
+  poster_id: -1,
   location: '',
   tags: [],
   create_time: '',
@@ -147,27 +159,40 @@ const Request = reactive({
   files: []
 })
 
-const Response = reactive([1,2,3,4])
-// const Response = reactive({
-//   available: false,
-//   tags: ['tag1','tag2'],
-//   date: '2023.11.28',
-//   desc: 'description',
-//   imgs: ['https://cdn.vuetifyjs.com/images/cards/house.jpg', 
-//     'https://cdn.vuetifyjs.com/images/cards/road.jpg',
-//     'https://cdn.vuetifyjs.com/images/cards/plane.jpg'
-//   ],
-//   files: [
+const Dialog = ref(false);
 
-//   ]
-// })
+const Response = reactive([1,2,3,4])
+
+const is_poster = computed(() => {
+  return QUERY.get_user_id() === Request.poster_id;
+})
+
+const Reponse = reactive({
+  personal: undefined,
+  accepted: undefined,
+  rest: []
+})
+
+function filterResponse(data) {
+  Reponse.personal = undefined;
+  Reponse.rest = []
+  data.forEach(element => {
+    if(element.responder_id == QUERY.get_user_id()) {
+      Reponse.personal = element.id;
+    } else if(element.id != Reponse.accepted) {
+      Reponse.rest.push(element.id);
+    }
+  });
+}
 
 onMounted(() => {
   QUERY.get('/api/user/request/query_detail',{
     request_id : POST_ID
   })
   .then(data => {
+    console.log(data)
     const info = data.data;
+    Request.poster_id = Number(info.poster_id);
     Request.location = info.city;
     Request.create_time = info.create_time;
     Request.modify_time = info.modify_time;
@@ -177,9 +202,10 @@ onMounted(() => {
     Request.status = info.status;
     Request.images = info.image_files;
     Request.files = info.raw_files;
+    Response.splice(0, Response.length);
+    Reponse.accepted = info.accepted_response_id;
+    filterResponse(info.pending_responses);
   })
-  
-  
 })
 
 </script>

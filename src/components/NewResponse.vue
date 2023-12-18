@@ -1,13 +1,21 @@
 <template>
-  <!-- step 1-->
-
-  <!-- step 2 -->
+  <!-- step 1 -->
   <div>
-    <p class="text-subtitle-1 font-weight-bold mb-2 ml-1">
-      详细描述
-    </p>
+    <div class="d-flex flex-row">
+      <p class="text-subtitle-1 font-weight-bold mb-2 ml-1">
+        响应内容
+      </p>
+      <v-icon size="24" class="ml-auto mr-4" @click="ImageInputRef.click()">
+        mdi-image-plus-outline
+      </v-icon>
+      <v-icon size="24" class="mr-2" @click="FileInputRef.click()">
+        mdi-folder-plus-outline
+      </v-icon>
+    </div>
+    
     <v-textarea
       v-model="Input.desc"
+      auto-grow
       variant="outlined"
       dense
       class="mb-2"
@@ -22,10 +30,6 @@
       multiple
     />
 
-    <v-btn color="blue-accent-3" @click="ImageInputRef.click()">
-      添加图像  
-    </v-btn>
-
     <v-row class="mt-4">
       <v-col v-for="(item, index) in Input.images" cols="auto">
         <v-img :src="item.raw" aspect-ratio="1" cover min-width="200">
@@ -39,6 +43,8 @@
         </v-img>
       </v-col>
     </v-row>
+
+    
   </div>
 
   <!-- step 4 -->
@@ -50,11 +56,7 @@
       multiple
     />
 
-    <v-btn color="blue-accent-3" @click="FileInputRef.click()">
-      添加其他文件
-    </v-btn>
-
-    <v-list>
+    <v-list style="background: none;">
       <v-list-item v-for="(file, index) in Input.files" :key="index"
         :title="file.name"
         :subtitle="formatFileSize(file.size)"

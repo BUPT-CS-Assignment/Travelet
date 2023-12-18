@@ -5,10 +5,9 @@
     有朋自远方来
   </p>
 
-  <!-- data num
   <p class="align-self-center text-body-2 text-grey-darken-2">
     {{ City }}
-  </p> -->
+  </p>
 
     <!-- search bar -->
     <div style="min-width: 400px; max-width: 600px;" class="align-self-center">
@@ -28,8 +27,8 @@
   <!-- post content -->
   <div class="my-2">
     <v-row>
-      <v-col v-for="(item, index) in 8" class="ma-2">
-        <poster />
+      <v-col v-for="(value, key) in Posts" class="ma-2">
+        <poster :id="Number(key)" :data="value"/>
       </v-col>
     </v-row>
   </div>
@@ -54,16 +53,20 @@ import { onMounted } from 'vue';
 const PageLen = ref(1);
 const CurPage = ref(1);
 
-// const City = ref('')
+const City = ref('')
 
-function search(page=1, str='') {
-  QUERY.get('/api/user/response/query_brief', {
-    // city: City.value,
-    str: str,
+const Posts = reactive({})
+
+function search(page=1) {
+  QUERY.get('/api/user/request/query_brief', {
+    city: City.value,
     page: page
   })
   .then(data => {
     console.log(data)
+    data.data.forEach(element => {
+      Posts[element.id] = element
+    });
   })
 }
 
@@ -74,8 +77,7 @@ function onTagChange(val) {
 onMounted(() => {
   QUERY.get('/api/user/info', {}, 'user_id')
   .then(data => {
-    // let citys = String(data.data.register_city)
-    // City.value = citys;
+    City.value = data.data.register_city;
     search();
   })
 })
