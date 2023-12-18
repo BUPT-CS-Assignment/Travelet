@@ -117,7 +117,7 @@ function login() {
     if(res.status == 0){
       QUERY.set_user_name(Input.usr);
       QUERY.set_user_id(res.user_id);
-      if(username == 'admin')
+      if(Input.usr == 'admin')
         Router.push('/admin');
       else
         Router.push('/home');
