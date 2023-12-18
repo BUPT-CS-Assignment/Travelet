@@ -14,6 +14,7 @@
       <!-- username -->
       <p>用户名</p>
       <v-text-field variant="outlined" density="compact"
+        :rules="[rules.required]"
         v-model="Input.usr"
         prepend-inner-icon="mdi-account-outline"
       />
@@ -25,6 +26,7 @@
       <!-- phone number -->
       <p>联系方式</p>
       <v-text-field variant="outlined" density="compact"
+        :rules="[rules.required, rules.lim]"
         v-model="Input.phone"
         prepend-inner-icon="mdi-cellphone-link"
         type="text"
@@ -33,6 +35,7 @@
       <!-- password -->
       <p>密码</p>
       <v-text-field variant="outlined" density="compact"
+        :rules="[rules.min, rules.number, rules.alpha]"
         v-model="Input.pwd"
         :append-inner-icon="Input.vis1 ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
         :type="Input.vis1 ? 'text' : 'password'"
@@ -43,6 +46,7 @@
       <!-- comfirm -->
       <p>确认密码</p>
       <v-text-field variant="outlined" density="compact"
+        :rules="[rules.required, rules.match]"
         v-model="Input.pwd2"
         :append-inner-icon="Input.vis2 ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
         :type="Input.vis2 ? 'text' : 'password'"
@@ -52,7 +56,7 @@
 
       <!-- register -->
       <v-btn color="green-darken-1" variant="elevated" class="mt-4" width="420px"
-        :disabled="Input.usr.length == 0 || Input.pwd.length == 0 || Input.pwd2.length == 0 || RegionRef.getCity().length == 0"
+        :disabled="!assert"
         @click="register"
         >
         <p class="font-weight-bold">注册</p>
@@ -82,6 +86,7 @@ import { useRouter } from 'vue-router';
 import Logo from '@/components/Logo.vue';
 import RegionSelect from '@/components/RegionSelect.vue';
 import * as QUERY from '@/plugins/query'
+import { computed } from 'vue';
 
 const RegionRef = ref(null);
 const Router = useRouter();
@@ -107,7 +112,34 @@ function targetLogin() {
   Router.push('/login');
 }
 
+const rules = {
+  required: (value) => !!value || '不能为空',
+  min: (v) => v.length >= 6 || '长度至少为6位数',
+  lim: (v) => v.length == 11 || '长度为11位数',
+  number: (v) => (/\d.*\d/.test(v)) || '至少需要两个数字',
+  alpha: (v) => (/[a-z]/.test(v) && /[A-Z]/.test(v)) || '不能均为小写或大写',
+  match: () => Input.pwd === Input.pwd2 || '两次密码不一致'
+};
+
+const assert = computed(() => {
+  return rules.required(Input.usr) === true &&
+         rules.required(Input.pwd) === true &&
+         rules.required(Input.pwd2) === true &&
+         rules.required(Input.phone) === true &&
+         rules.min(Input.pwd === true) &&
+         rules.number(Input.pwd) === true &&
+         rules.alpha(Input.pwd) === true &&
+         rules.lim(Input.phone) === true &&
+         rules.match() === true &&
+         (RegionRef.value != null && RegionRef.value.isComplete());
+})
+
 function register() {
+  if(!assert) {
+    alert('注册信息不正确，请检查输入');
+    return;
+  }
+
   QUERY.post('api/user/register', {
     username: Input.usr,
     password: Input.pwd,

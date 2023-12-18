@@ -58,7 +58,7 @@
 > 
   <NewPost
     :onCancel="()=>{Dialog=false;}"
-    :onComplete="()=>{Dialog=false;}"
+    :onComplete="()=>{Dialog=false; refresh();}"
   ></NewPost>
 </v-dialog>
 </template>
@@ -82,7 +82,7 @@ const Dialog = ref(false);
 
 const Posts = reactive({})
 
-onMounted(() => {
+function refresh() {
   QUERY.get('/api/user/request/query_brief', {
     page : 1,
     str : ""
@@ -92,6 +92,10 @@ onMounted(() => {
       Posts[element.id] = element
     });
   }) 
+}
+
+onMounted(() => {
+  refresh();
 })
 
 

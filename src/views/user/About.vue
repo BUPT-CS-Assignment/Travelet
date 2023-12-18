@@ -74,15 +74,59 @@
       width="300px" class="pa-4"
     >
       <div class="text-black text-caption">
-        <p class="font-weight-bold">
-          Travelet 网站建议
-        </p>
-        <p class="my-1">
-          定期检查并更新您的密码
-        </p>
-        <v-btn color="red" size="small" elevation="0">
-          <p class="text-caption font-weight-bold">更改密码</p>
-        </v-btn>
+        <template v-if="!Change">
+          <p class="font-weight-bold">
+            Travelet 网站建议
+          </p>
+          <p class="my-1">
+            定期检查并更新您的密码
+          </p>
+          <v-btn color="red" size="small" elevation="0"
+            @click="Change = true"
+          >
+            <p class="text-caption font-weight-bold">更改密码</p>
+          </v-btn>
+        </template>
+        <template v-else>
+          <p class="font-weight-bold">
+            修改密码
+          </p>
+          <!-- password -->
+          <p>新密码</p>
+          <v-text-field variant="outlined" density="compact"
+            :rules="[rules.min, rules.number, rules.alpha]"
+            v-model="Input.pwd"
+            :append-inner-icon="Input.vis1 ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+            :type="Input.vis1 ? 'text' : 'password'"
+            prepend-inner-icon="mdi-lock-outline"
+            @click:append-inner="Input.vis1 = !Input.vis1"
+          />
+
+          <!-- comfirm -->
+          <p>确认密码</p>
+          <v-text-field variant="outlined" density="compact"
+            :rules="[rules.required, rules.match]"
+            v-model="Input.pwd2"
+            :append-inner-icon="Input.vis2 ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+            :type="Input.vis2 ? 'text' : 'password'"
+            prepend-inner-icon="mdi-lock-alert-outline"
+            @click:append-inner="Input.vis2 = !Input.vis2"
+          />
+
+          <div class="d-flex">
+            <v-btn color="red" size="small" elevation="0" @click="resetChange">
+              <p class="text-caption font-weight-bold">取消</p>
+            </v-btn>
+            <v-btn color="blue-accent-3" size="small" elevation="0" class="ml-2"
+              :disabled="!assert" @click="postChange"
+            >
+              <p class="text-caption font-weight-bold">确认</p>
+            </v-btn>
+          </div>
+        </template>
+        
+        
+        
       </div>
     </v-card>
 
@@ -110,25 +154,68 @@
     <v-spacer class="my-4" />
     <v-divider class="mb-6" />
     
-    <!-- profile -->
-    <template v-for="(value,label) in InfoLabel">
-      <p class="d-flex text-body-2 flex-wrap my-1">
-        <strong class="font-weight-black mr-3">
-          {{ label }}:
-        </strong>
-        {{ UserData[value] }}
-      </p>
-    </template>
+    <!-- phone -->
+    <div class="d-flex align-center">
+      <template v-if="!Update">
+        <v-icon size="22" color="grey-darken-1">mdi-cellphone-link</v-icon>
+        <p class="ml-3"></p>
+        <p> {{ UserData.phone }} </p>
+      </template>
+      <template v-else>
+        <v-text-field variant="outlined" density="compact"
+          :rules="[rules.required, rules.lim]"
+          v-model="Input.phone"
+          prepend-inner-icon="mdi-cellphone-link"
+          type="text"
+        />
+      </template>
+    </div>
+
+    <v-spacer class="mt-2"></v-spacer>
+
+    <!-- intro -->
+    <div class="d-flex align-center">
+      <template v-if="!Update">
+        <v-icon size="22" color="grey-darken-1">mdi-card-account-details</v-icon>
+        <p class="ml-2"></p>
+        <p> {{ UserData.intro }} </p>
+      </template>
+      <template v-else>
+        <v-textarea
+          prepend-inner-icon="mdi-card-account-details"
+          v-model="Input.intro"
+          variant="outlined"
+          auto-grow
+        />
+      </template>
+    </div>
+
 
     <v-spacer class="my-3" />
     <v-divider class="mb-6" />
     
     <!-- edit profile -->
-    <v-btn color="blue-accent-3" class="align-self-start" elevation="0">
-      <p class="text-subtitle-1">更新信息</p>
-    </v-btn>
-
-
+    <template v-if="!Update">
+      <v-btn color="blue-accent-3" class="align-self-start" elevation="0"
+        @click="Update = true"
+      >
+        <p class="text-subtitle-1">更新信息</p>
+      </v-btn>
+    </template>
+    <template v-else>
+      <div class="d-flex">
+        <v-btn color="red" variant="outlined" class="align-self-start" elevation="0"
+          @click="resetUpdate"
+        >
+          <p class="text-subtitle-1">取消</p>
+        </v-btn>
+        <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0"
+          @click="postUpdate"
+        >
+          <p class="text-subtitle-1">确认</p>
+        </v-btn>
+      </div>
+    </template>
   </div>
 </div>
 
@@ -143,14 +230,13 @@
     我发布的响应
   </p>
 
-
 </div>
+
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import * as QUERY from '@/plugins/query'
-import { onMounted } from 'vue';
 
 const UserData = reactive({
   name: QUERY.get_user_name(),
@@ -161,10 +247,15 @@ const UserData = reactive({
   intro: '',
 })
 
-const InfoLabel = {
-  联系方式: 'phone',
-  个人简介: 'intro'
-}
+const Input = reactive({
+  pwd: '',
+  pwd2: '',
+  phone: '',
+  intro: '',
+  vis1 : false,
+  vis2 : false
+})
+
 
 const Latest = reactive({
   date: '2023.11.28',
@@ -177,6 +268,50 @@ const Latest = reactive({
   ],
 })
 
+
+const Update = ref(false);
+const Change = ref(false);
+
+const rules = {
+  required: (value) => !!value || '不能为空',
+  min: (v) => v.length >= 6 || '长度至少为6位数',
+  lim: (v) => v.length == 11 || '长度为11位数',
+  number: (v) => (/\d.*\d/.test(v)) || '至少需要两个数字',
+  alpha: (v) => (/[a-z]/.test(v) && /[A-Z]/.test(v)) || '不能均为小写或大写',
+  match: () => Input.pwd === Input.pwd2 || '两次密码不一致'
+};
+
+function resetUpdate() {
+  Input.phone = UserData.phone;
+  Input.intro = UserData.intro;
+  Update.value = false;
+}
+
+function postUpdate() {
+
+}
+
+function resetChange() {
+  Input.pwd = '';
+  Input.pwd2 = '';
+  Input.vis1 = false;
+  Input.vis2 = false;
+  Change.value = false;
+}
+
+function postChange() {
+
+}
+
+const assert = computed(() => {
+  return rules.required(Input.pwd) === true &&
+         rules.required(Input.pwd2) === true &&
+         rules.min(Input.pwd === true) &&
+         rules.number(Input.pwd) === true &&
+         rules.alpha(Input.pwd) === true &&
+         rules.match() === true;
+})
+
 onMounted(() => {
   QUERY.get('/api/user/info', {}, 'user_id')
   .then(data => {
@@ -185,6 +320,9 @@ onMounted(() => {
     UserData.loc2 = citys[1]
     UserData.phone = data.data.telephone
     UserData.intro = data.data.description ? data.data.description : ''
+
+    Input.phone = UserData.phone;
+    Input.intro = UserData.intro;
   })
 })
 </script>

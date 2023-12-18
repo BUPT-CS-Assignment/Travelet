@@ -46,4 +46,11 @@ onMounted(() => {
   TagsPreset.value = props.tags;
 })
 
+// expose
+defineExpose({
+  getData: () => {
+    return tags.value;
+  }
+})
+
 </script>

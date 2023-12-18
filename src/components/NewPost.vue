@@ -52,7 +52,7 @@
           探索标签
         </p>
         <TagBar icon="mdi-tag-multiple-outline" variant="outlined"
-          :tags="TagsPreset">
+          ref="TagsInputRef" :tags="TagsPreset">
         </TagBar>
 
         <p class="text-subtitle-1 font-weight-bold mb-2 ml-1">
@@ -175,7 +175,6 @@ const props = defineProps({
 
 const Input = reactive({
   brief: 'Brief',
-  tags: [],
   desc: 'Description',
   images: [],
   image_data: [],
@@ -185,6 +184,7 @@ const Input = reactive({
 const RegionSelectRef = ref(null);
 const ImageInputRef = ref(null);
 const FileInputRef = ref(null);
+const TagsInputRef = ref(null);
 
 const Step = ref(1);
 const Steps = ['Step1', 'Step2', 'Step3', 'Step4'];
@@ -233,9 +233,10 @@ function upload() {
   // brief
   formData.append('title', Input.brief);
   // tags
-  for (let i = 0; i < Input.tags.length; i++) {
-    const tag = Input.tags[i];
-    formData.append('tags[]', tag);
+  const tags = TagsInputRef.value.getData();
+  for (let i = 0; i < tags.length; i++) {
+    const tag = tags[i];
+    formData.append('tags', tag);
   }
   // desc
   formData.append('description', Input.desc);
@@ -256,7 +257,12 @@ function upload() {
   // post
   QUERY.post('/api/user/request/post', formData, null, false)
   .then(res => {
-    console.log(res)
+    if(res.status == 0) {
+      alert('发布成功');
+      props.onComplete();
+    } else {
+      alert(res.message)
+    }
   })
 }
 
