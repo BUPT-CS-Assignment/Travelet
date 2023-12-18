@@ -37,7 +37,6 @@ function get(url, param = {}, identifier = null) {
     fetch(url_encode)
     .then(response => response.json())
     .then(data => {
-      console.log(data)
       resolve(data)
     })
     .catch(err => {
@@ -65,7 +64,6 @@ function post(url, data, identifier = null, json = true, headers = {}) {
     })
     .then(response => response.json())
     .then(data => {
-      console.log(data)
       resolve(data)
     })
     .catch(err => {

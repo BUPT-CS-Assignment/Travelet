@@ -13,12 +13,14 @@
       <!-- username -->
       <p>用户名</p>
       <v-text-field variant="outlined" density="compact"
+        :rules="[rules.required]"
         v-model="Input.usr"
         prepend-inner-icon="mdi-account-outline"
       />
       <!-- password -->
       <p>密码</p>
       <v-text-field variant="outlined" density="compact"
+        :rules="[rules.required]"
         v-model="Input.pwd"
         :append-inner-icon="Input.vis ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
         :type="Input.vis ? 'text' : 'password'"
@@ -67,6 +69,7 @@ import { ref, reactive } from 'vue';
 import Logo from '@/components/Logo.vue';
 import { useRouter } from 'vue-router';
 import * as QUERY from '@/plugins/query'
+import { computed } from 'vue';
 
 
 const Router = useRouter();
@@ -89,11 +92,23 @@ function targetRegister() {
   Input.usr = '';
   Input.pwd = '';
   Input.vis = false
-
   Router.push('/register');
 }
 
+const rules = {
+  required: (value) => !!value || '不能为空'
+}
+
+const assert = computed(() => {
+  return rules.required(Input.usr) === true && rules.required(Input.pwd) === true;
+})
+
 function login() {
+  if(!assert) {
+    alert('用户名或密码不能为空');
+    return;
+  }
+
   QUERY.post('/api/user/login',{
     username: Input.usr,
     password: Input.pwd
