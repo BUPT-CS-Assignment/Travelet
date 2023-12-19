@@ -49,7 +49,6 @@ function setData(data) {
 // on mounted
 onMounted(() => {
   TagsPreset.value = props.tags;
-  tags.value = props.preset;
 })
 
 // expose
