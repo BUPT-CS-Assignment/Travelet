@@ -81,12 +81,13 @@ function newQuery(tags = null) {
     page: PageVal.value
   }
   if(tags != null && tags.length > 0) {
-    query.search = tags.join(' ');
+    query.search;
   }
   Router.push({
     path: '/home/explore',
     query: query
   })
+  applyQuery(query);
 }
 
 function fetchData(){
@@ -100,7 +101,7 @@ function fetchData(){
     is_responder:1
   }
   
-  if(Tags.length > 0) {
+  if(Tags && Tags.length > 0) {
     params.str = Tags.join(' ');
   }
 
@@ -116,9 +117,12 @@ function fetchData(){
 
     PageLen.value = data.total_pages;
 
-    data.data.forEach(element => {
-      Posts[element.id] = element
-    });
+    setTimeout(()=>{
+      data.data.forEach(element => {
+        Posts[element.id] = element
+      });
+    }, 100);
+    
   })
   .catch(err => {
     alert(err);
@@ -126,6 +130,16 @@ function fetchData(){
   })
 }
 
+
+function applyQuery(query) {
+  PageVal.value = query.page;
+  Tags = query.search;
+  RefTagsInput.value.setData(Tags);
+  fetchData();
+}
+
+
+///// parse router
 function parseRoute(query) {
   let data = {
     page: 1,
@@ -139,22 +153,6 @@ function parseRoute(query) {
   }
   // console.log(data);
   return data;
-}
-
-function assertTags(new_tag, old_tag) {
-  if(new_tag.length != old_tag.length)
-    return false;
-  new_tag.forEach((tag, idx) => {
-    if(!(tag in old_tag)) return false;
-  })
-  return true;
-}
-
-function applyQuery(query) {
-  PageVal.value = query.page;
-  Tags = query.search;
-  RefTagsInput.value.setData(Tags);
-  fetchData();
 }
 
 onMounted(() => {
@@ -172,24 +170,6 @@ onMounted(() => {
     UserCity.value = String(city);
     applyQuery(parseRoute(Route.query));
   }
-
-  // watch router change
-  watch(() => Route.query, (newVal, oldVal) => {
-    // console.log(newVal);
-    // console.log(oldVal);
-
-    let newData = parseRoute(newVal);
-    let oldData = parseRoute(oldVal);
-    
-    if(!assertTags(newData.search, oldData.search)) {
-      PageVal.value = 1;
-      newQuery(newData.search);
-    } else if(newData.page == oldData.page) {
-      return;
-    }
-
-    applyQuery(newData);
-  })
 })
 
 </script>

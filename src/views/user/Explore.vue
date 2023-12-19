@@ -68,7 +68,7 @@
 </template>
 
 <script setup>
-import {ref, reactive, onMounted, watch} from 'vue';
+import {ref, reactive, onMounted, watch, toRaw} from 'vue';
 import { useRoute, useRouter  } from 'vue-router';
 import TagBar from '@/components/util/TagBar.vue'
 import Poster from '@/components/poster/ExplorePoster.vue';
@@ -93,6 +93,69 @@ const Dialog = ref(false);
 const Posts = reactive({})
 var Tags = [];
 
+///// query 
+function newQuery(tags = null) {
+  let query = {
+    page: PageVal.value
+  }
+  if(tags != null && tags.length > 0) {
+    query.search = tags;
+  } 
+  Router.push({
+    path: '/home/explore',
+    query: query
+  })
+  applyQuery(query);
+}
+
+///// apply server query
+function applyQuery(query) {
+  PageVal.value = query.page;
+  Tags = query.search;
+  RefTagsInput.value.setData(Tags);
+  fetchData();
+}
+
+
+///// fetch from server
+function fetchData(){
+  RefLoading.value.show();
+
+  let params = { page : PageVal.value }
+  if(Tags && Tags.length > 0) {
+    params.str = Tags.join(' ');
+  }
+  console.log(params);
+
+  QUERY.get('/api/user/request/query_brief', params, 'poster_id')
+  .then(data => {
+    console.log(data)
+    if(PageVal.value > data.total_pages) {
+      PageVal.value = data.total_pages;
+      return newQuery(Tags);
+    }
+
+    Object.keys(Posts).forEach(key => {
+      delete Posts[key];
+    })
+    RefLoading.value.hide();
+
+    PageLen.value = data.total_pages;
+
+    setTimeout(()=>{
+      data.data.forEach(element => {
+        Posts[element.id] = element
+      });
+    }, 100);
+
+    
+  })
+  .catch(err => {
+    alert(err);
+    Router.push('/home');
+  })
+}
+
 ///// Route parse
 function parseRoute(query) {
   let data = {
@@ -113,94 +176,8 @@ function parseRoute(query) {
   return data;
 }
 
-
-///// query 
-function newQuery(tags = null) {
-  let query = {
-    page: PageVal.value
-  }
-  if(tags != null && tags.length > 0) {
-    query.search = tags.join(' ');
-  }
-  Router.push({
-    path: '/home/explore',
-    query: query
-  })
-}
-
-///// apply server query
-function applyQuery(query) {
-  PageVal.value = query.page;
-  Tags = query.search;
-  RefTagsInput.value.setData(Tags);
-  fetchData();
-}
-
-
-///// fetch from server
-function fetchData(){
-  RefLoading.value.show();
-
-  let params = { page : PageVal.value }
-  if(Tags.length > 0) {
-    params.str = Tags.join(' ');
-  }
-  console.log(params);
-
-  QUERY.get('/api/user/request/query_brief', params, 'poster_id')
-  .then(data => {
-    console.log(data)
-    if(PageVal.value > data.total_pages) {
-      PageVal.value = data.total_pages;
-      return newQuery(Tags);
-    }
-
-    Object.keys(Posts).forEach(key => {
-      delete Posts[key];
-    })
-    RefLoading.value.hide();
-
-    PageLen.value = data.total_pages;
-
-    data.data.forEach(element => {
-      Posts[element.id] = element
-    });
-  })
-  .catch(err => {
-    alert(err);
-    Router.push('/home');
-  })
-}
-
-
-function assertTags(new_tag, old_tag) {
-  if(new_tag.length != old_tag.length)
-    return false;
-  new_tag.forEach((tag, idx) => {
-    if(!(tag in old_tag)) return false;
-  })
-  return true;
-}
-
 onMounted(() => {
   applyQuery(parseRoute(Route.query));
-  
-  watch(() => Route.query, (newVal, oldVal) => {
-    // console.log(newVal);
-    // console.log(oldVal);
-
-    let newData = parseRoute(newVal);
-    let oldData = parseRoute(oldVal);
-    
-    if(!assertTags(newData.search, oldData.search)) {
-      PageVal.value = 1;
-      newQuery(newData.search);
-    } else if(newData.page == oldData.page) {
-      return;
-    }
-
-    applyQuery(newData);
-  })
 })
 
 
