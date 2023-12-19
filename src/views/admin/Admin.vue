@@ -57,7 +57,7 @@
 </style>
 
 <script>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router';
 import * as echarts from 'echarts'
 import * as QUERY from '@/plugins/query'
@@ -96,6 +96,30 @@ export default {
     const tagOptions = ref([]);
     const cities = ref([]);
     const filteredBills = ref([]);
+    const sortedBills = ref([]);
+    const myChart = ref(null);
+    const chartOption = ref({
+      tooltip: {},
+      legend: {
+        data: ['盈利'],
+      },
+      xAxis: {
+        data: [],
+      },
+      yAxis: {
+        axisLabel: {
+          formatter: '{value} 元',
+        },
+      },
+      series: [
+        {
+          name: '盈利',
+          type: 'line',
+          smooth: true,
+          data: [],
+        },
+      ],
+    });
     const headers = ref([
       { title: 'Id', value: 'id' },
       { title: 'Year', value: 'year' },
@@ -120,14 +144,14 @@ export default {
       const tagData = await QUERY.post('/api/common/query/tags');
       tagOptions.value = tagData.data;
 
-      const sortedBills = await fetchandProcessBillData(
+      sortedBills.value = await fetchandProcessBillData(
         current_tag.value,
         current_location.value,
         start_month.value,
         end_month.value
       );
       
-      filteredBills.value = sortedBills.map(item => {
+      filteredBills.value = sortedBills.value.map(item => {
         const filteredItem = {};
         headers.value.forEach(header => {
           const field = header.title.toLowerCase();
@@ -137,32 +161,23 @@ export default {
       });
       console.log(filteredBills);
       // Initialize and configure echarts
-      const myChart = echarts.init(document.getElementById('chart'));
-      const option = {
-        tooltip: {},
-        legend: {
-          data: ['盈利'],
-        },
-        xAxis: {
-          data: sortedBills.map(item => {
-            return item.year + '-' + item.month;
-          }),
-        },
-        yAxis: {
-          axisLabel: {
-            formatter: '{value} 元',
-          },
-        },
-        series: [
-          {
-            name: '盈利',
-            type: 'line',
-            smooth: true,
-            data: sortedBills.map(item => item.profit),
-          },
-        ],
-      };
-      myChart.setOption(option);
+      chartOption.value.xAxis.data = sortedBills.value.map(item => {
+        return item.year + '-' + item.month;
+      });
+      chartOption.value.series[0].data = sortedBills.value.map(item => item.profit);
+      myChart.value = echarts.init(document.getElementById('chart'));
+      myChart.value.setOption(chartOption.value);
+      watch(() => sortedBills.value, (newSortedBills) => {
+        // Update the chartOption when sortedBills changes
+        chartOption.value.xAxis.data = newSortedBills.map(item => {
+          return item.year + '-' + item.month;
+        });
+
+        chartOption.value.series[0].data = newSortedBills.map(item => item.profit);
+
+        // Update the ECharts chart
+        myChart.value.setOption(chartOption.value);
+      });
     });
 
     return {
@@ -174,12 +189,14 @@ export default {
       end_month,
       tagOptions,
       cities,
+      sortedBills,
+      myChart,
       fetchandProcessBillData
     };
   },
   methods: {
     async handleChange() {
-      const sortedBills = await this.fetchandProcessBillData(
+      this.sortedBills = await this.fetchandProcessBillData(
         this.current_tag,
         this.current_location,
         this.start_month,
@@ -187,7 +204,7 @@ export default {
       );
 
       // Update filteredBills
-      this.filteredBills = sortedBills.map(item => {
+      this.filteredBills = this.sortedBills.map(item => {
         const filteredItem = {};
         this.headers.forEach(header => {
           const field = header.title.toLowerCase();
