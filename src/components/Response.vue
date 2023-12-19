@@ -14,7 +14,7 @@
     <!-- buttons -->
     <template v-if="props.modified">
       <div class="ml-auto d-flex align-self-end">
-        <template v-if="!Flags.update">
+        <template v-if="!Status.update">
           <v-icon color="red" size="24" class="mr-4" @click="remove">
             mdi-trash-can-outline
           </v-icon>
@@ -36,7 +36,7 @@
 
   <!-- detail -->
   <div class="mt-2">
-    <template v-if="!Flags.update">
+    <template v-if="!Status.update">
       <p style="word-break: break-all;"> {{BindData.desc}} </p>
     </template>
     <template v-else>
@@ -51,13 +51,6 @@
     </template>
   
     <!-- images -->
-    <template v-if="props.modified">
-      <v-file-input ref="RefImageInput"
-        style="position: absolute;display: none;" accept="image/*"
-        @change="(event) => handleImageInput(event)"
-        multiple
-      />
-    </template>
     <v-row class="mt-4">
       <!-- server images -->
       <v-col v-for="(item, index) in BindData.images" cols="auto">
@@ -98,7 +91,7 @@
       <template v-slot:prepend>
         <v-icon color="grey-darken-3"> {{ FILES.iconFileType(file.type) }} </v-icon>
       </template>
-      <template v-if="modified" v-slot:append>
+      <template v-if="props.modified" v-slot:append>
         <v-btn @click="" icon="" variant="text" color="red" size="small">
           <v-icon size="large">mdi-close</v-icon>
         </v-btn>
@@ -106,12 +99,6 @@
     </v-list-item>
     <!-- local files -->
     <template v-if="props.modified">
-      <v-file-input
-        style="position: absolute;display: none;"
-        ref="RefFileInput"
-        @change="(event) => handleFileInput(event)"
-        multiple
-      />
       <v-list-item v-for="(file, index) in BindInput.files" :key="index"
         :title="file.name"
         :subtitle="FILES.formatFileSize(file.size)"
@@ -119,7 +106,7 @@
         <template v-slot:prepend>
           <v-icon color="grey-darken-3"> {{ FILES.iconFileType(file.type) }} </v-icon>
         </template>
-        <template v-if="modified" v-slot:append>
+        <template v-slot:append>
           <v-btn @click="handleFileRemove(index)" icon="" variant="text" color="red" size="small">
             <v-icon size="large">mdi-close</v-icon>
           </v-btn>
@@ -129,7 +116,7 @@
   </div>
 
   <!-- modify -->
-  <template v-if="Flags.update">
+  <template v-if="Status.update">
     <div class="d-flex">
       <v-btn color="red" variant="outlined" class="ml-auto" elevation="0" 
         @click="cancel"
@@ -147,7 +134,7 @@
   </template>
   
   <!-- accept -->
-  <template v-if="props.acceptable">
+  <template v-if="props.acceptable && Status.loaded">
     <div class="d-flex justify-end mt-2">
       <v-btn color="red" variant="outlined" class="ml-auto" elevation="0">
         <p class="text-subtitle-1">拒绝</p>
@@ -161,6 +148,20 @@
 
 <!-- Amplify -->
 <image-amp ref="RefImageAmp"></image-amp>
+
+<template v-if="props.modified">
+  <v-file-input ref="RefImageInput"
+    style="position: absolute;display: none;" accept="image/*"
+    @change="(event) => handleImageInput(event)"
+    multiple
+  />
+  <v-file-input
+    style="position: absolute;display: none;"
+    ref="RefFileInput"
+    @change="(event) => handleFileInput(event)"
+    multiple
+  />
+</template>
 </template>
 
 <script setup>
@@ -174,8 +175,8 @@ const props = defineProps({
   responder_id: {type: Number, default: null},
   response_id: { type:Number, default: null},
   request_id: { type:Number, default: null },
-  modified: { type: Boolean, default: true },
-  acceptable: { type: Boolean, default: true },
+  modified: { type: Boolean, default: false },
+  acceptable: { type: Boolean, default: false },
   modify_at_init: {type:Boolean, default: false},
   on_cancel: { type: Function, default: ()=>{} },
   on_delete: { type: Function, default: ()=>{} },
@@ -188,8 +189,9 @@ const RefImageInput = ref(null);
 const RefFileInput = ref(null);
 
 ///// v-model
-const Flags = reactive({
-  update: false
+const Status = reactive({
+  update: false,
+  loaded: false
 })
 const BindInput = reactive({
   desc: '',
@@ -241,12 +243,12 @@ function handleFileRemove(idx) {
 ///// operations
 // modify
 function modify() {
-  Flags.update = true;
+  Status.update = true;
 }
 
 // cancel
 function cancel() {
-  Flags.update = false;
+  Status.update = false;
   BindInput.desc = BindData.desc;
   props.on_cancel();
 }
@@ -327,6 +329,8 @@ function init() {
     BindData.files = info.raw_files;
     // copy to input
     BindInput.desc = BindData.desc;
+
+    Status.loaded = true;
   })
 }
 
