@@ -28,7 +28,7 @@
         <div class="d-flex">
           <v-chip size="small" v-for="(tag, index) in Data.tags"
             class="mr-1" color="grey" style="z-index:9"
-            @click.stop="console.log(1)"
+            @click.stop="tagClick(tag)"
           > 
             <strong class="text-blue-accent-3">#</strong>
             <p class="text-black">{{ tag }}</p>
@@ -80,6 +80,10 @@ const props = defineProps({
   data: {
     type: Object,
     required: true
+  },
+  tagAction: {
+    type: Function,
+    default: () => {}
   }
 })
 
@@ -102,6 +106,10 @@ const Data = reactive({
   status: props.data.status,
   img: randomImage(),
 })
+
+function tagClick(tag) {
+  props.tagAction([tag]);
+}
 
 function randomImage() {
   const len = props.data.image_files.length;

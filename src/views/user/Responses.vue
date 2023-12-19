@@ -32,6 +32,7 @@
       :responder_id="item.responder_id"
       :modified="item.responder_id == USER_ID && BindData.status == 0"
       :acceptable="checkIsPoster && BindData.status == 0"
+      :on_delete="()=>{reload();}"
     />
   </template>
 </div>

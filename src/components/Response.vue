@@ -11,7 +11,7 @@
       <p class="text-caption text-grey-darken-2 ml-3"> {{ BindData.date }}</p>
     </div>
     <!-- my -->
-    <v-chip v-if="USER_ID == props.responder_id" label color="blue" class="align-self-start ml-3">
+    <v-chip v-if="USER_ID == RESPONDER" label color="blue" class="align-self-start ml-3">
       <v-icon size="small">mdi-account</v-icon>
       <p class="font-weight-bold ml-1">我的回复</p>
     </v-chip>
@@ -218,6 +218,7 @@ const props = defineProps({
 
 ///// const value
 const USER_ID = Number(QUERY.get_user_id());
+const RESPONDER = ref(null);
 
 ///// ref
 const RefImageAmp = ref(null);
@@ -360,7 +361,6 @@ function uploadModify() {
 
   QUERY.post('/api/user/response/modify', formData, null, false)
   .then(res => {
-    Status.uploading = false;
     alert('修改成功');
     window.location.reload();
   })
@@ -368,13 +368,13 @@ function uploadModify() {
 
 // cancel
 function cancel() {
-  Status.update = false;
   BindInput.desc = BindData.desc;
   BindInput.images = [];
   BindInput.files = [];
   BindInput.image_data = [];
   init();
   props.on_cancel();
+  Status.update = false;
 }
 
 // upload
@@ -416,6 +416,7 @@ function remove() {
 
 // on init
 function init_user(user_id) {
+  RESPONDER.value = Number(user_id);
   if(user_id === QUERY.get_user_id()) {
     BindData.name = QUERY.get_user_name();
     return;
@@ -445,6 +446,7 @@ function init() {
     console.log(info)
 
     if(!props.responder_id) {
+      RESPONDER.value = Number(info.responder_id);
       BindData.responder_id = info.responder_id;
       init_user(info.responder_id);
     }

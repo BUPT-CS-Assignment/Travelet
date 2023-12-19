@@ -444,7 +444,7 @@ function init() {
 
     init_user(BindData.poster_id);
     Status.loaded = true;
-    RefLoading.value.hide();
+    RefLoading && RefLoading.value.hide();
   })
 }
 

@@ -33,7 +33,7 @@
   <div class="my-2">
     <v-row>
       <v-col v-for="(value, key) in Posts" justify="center">
-        <poster :id="Number(key)" :data="value"/>
+        <poster :id="Number(key)" :data="value" :tagAction="newQuery"/>
       </v-col>
     </v-row>
   </div>
@@ -42,7 +42,7 @@
   <v-pagination 
     v-model="PageVal"
     :length="PageLen"
-    @update:model-value="newQuery"
+    @update:model-value="()=>{newQuery();}"
   />
 </div>
 <Loading ref="RefLoading"></Loading>
@@ -76,15 +76,18 @@ const PageVal = ref(1);
 const Posts = reactive({})
 var Tags = [];
 
-function newQuery(tags = null) {
+function newQuery(tags = []) {
+  if(!assertTags(Tags, tags)) {
+    PageVal.value = 1;
+  }
   let query = {
     page: PageVal.value
   }
-  if(tags != null && tags.length > 0) {
-    query.search;
+  if(tags && tags.length > 0) {
+    query.search = tags;
   }
   Router.push({
-    path: '/home/explore',
+    path: '/home/greet',
     query: query
   })
   applyQuery(query);
@@ -113,7 +116,7 @@ function fetchData(){
     Object.keys(Posts).forEach(key => {
       delete Posts[key];
     })
-    RefLoading.value.hide();
+    RefLoading && RefLoading.value.hide();
 
     PageLen.value = data.total_pages;
 
@@ -122,12 +125,12 @@ function fetchData(){
         Posts[element.id] = element
       });
     }, 100);
-    
+
   })
-  .catch(err => {
-    alert(err);
-    Router.push('/home');
-  })
+  // .catch(err => {
+  //   alert(err);
+  //   Router.push('/home');
+  // })
 }
 
 
@@ -138,6 +141,18 @@ function applyQuery(query) {
   fetchData();
 }
 
+///// tags assert
+function assertTags(old_, new_) {
+  try{
+    if(new_.length != old_.length) return false;
+    new_.forEach(element => {
+      if(!old_.includes(element)) return false;
+    });
+    return true;
+  }catch(err) {
+    return false;
+  }
+}
 
 ///// parse router
 function parseRoute(query) {
@@ -149,7 +164,7 @@ function parseRoute(query) {
   if(data.page < 1) data.page = 1;
 
   if(query.search) {
-    data.search = query.search.split(' ');
+    data.search = query.search;
   }
   // console.log(data);
   return data;

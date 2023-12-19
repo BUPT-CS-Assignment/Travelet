@@ -3,8 +3,8 @@
 <div class="d-flex flex-row flex-wrap">
 
   <!-- latest reponse -->
-  <div class="flex-grow-1 mx-auto pr-10 mt-6"
-    style="min-width: 440px; max-width: 800px;"
+  <div class="flex-grow-1 mx-3 pr-10 my-6"
+    style="min-width: 500px;"
   >
     <v-hover>
       <template v-slot:default="{ isHovering, props }">
@@ -13,48 +13,69 @@
           v-bind="props"
           :elevation="isHovering ? 10 : 1"
         >
-          <v-img :src="Latest.imgs[2]"
-            aspect-ratio="4/3"
+          <v-img :src="Latest.img" cover
+            max-height="500"
           />
 
-          <v-hover>
-            <template v-slot:default="{ isHovering, props }">
-              <v-card rounded="0" elevation="0" 
-                class="d-flex flex-column py-4"
-                v-bind="props"
-                :color="isHovering ? 'blue-accent-3' : ''"
-                @click=""
-              >
-                <p class="align-self-center text-subtitle-1 font-weight-medium">
-                  查看最新响应 !
-                  <v-card class="align-self-center" elevation="0"
-                    height="2px" color="blue-accent-3"
-                  />
-                </p>
-              </v-card>
-            </template>
-          </v-hover>
-          
+          <template v-if="Latest.flag">
+            <v-hover>
+              <template v-slot:default="{ isHovering, props }">
+                <v-card rounded="0" elevation="0" 
+                  class="d-flex flex-column py-4"
+                  v-bind="props"
+                  :color="isHovering ? 'blue-accent-3' : ''"
+                  @click="checkLatest"
+                >
+                  <p class="align-self-center text-subtitle-1 font-weight-medium">
+                    查看最新回复 !
+                    <v-card class="align-self-center" elevation="0"
+                      height="2px" color="blue-accent-3"
+                    />
+                  </p>
+                </v-card>
+              </template>
+            </v-hover>
+          </template>
+          <template v-else>
+            <v-card rounded="0" elevation="0" class="d-flex flex-column py-4">
+              <p class="align-self-center text-subtitle-1 font-weight-medium">
+                暂无回复
+                <v-card class="align-self-center" elevation="0"
+                  height="2px" color="blue-accent-3"
+                />
+              </p>
+            </v-card>
+          </template>
 
+          <!-- basic info -->
           <v-divider></v-divider>
           <v-card-text class="d-flex flex-row">
-            <v-row justify="center">
-              <v-col class="d-flex flex-column">
+            <template v-if="Latest.flag">
+              <v-row justify="center">
+                <v-col class="d-flex flex-column">
+                  <p class="align-self-center">
+                    {{ Latest.date }}
+                  </p>
+                </v-col>
+                <v-col class="d-flex flex-column">
+                  <p class="align-self-center">
+                    {{ Latest.city }}
+                  </p>
+                </v-col>
+                <v-col class="d-flex flex-column">
+                  <span class="align-self-center d-inline-block text-truncate">
+                    {{ Latest.brief }}  
+                  </span>
+                </v-col>
+              </v-row>
+            </template>
+            <template v-else>
+              <div class="d-flex justify-center" style="width:100%">
                 <p class="align-self-center">
-                  {{ Latest.date }}
+                  等待其他用户回应
                 </p>
-              </v-col>
-              <v-col class="d-flex flex-column">
-                <p class="align-self-center">
-                  {{ Latest.loc1 }}, {{ Latest.loc2 }}
-                </p>
-              </v-col>
-              <v-col class="d-flex flex-column">
-                <p class="align-self-center">
-                  {{ Latest.brief }}  
-                </p>
-              </v-col>
-            </v-row>
+              </div>
+            </template>
           </v-card-text>
 
           <!-- background -->
@@ -65,7 +86,7 @@
   </div>
 
   <!-- user info -->
-  <div class="d-flex flex-column align-self-start mt-6 mr-auto" 
+  <div class="d-flex flex-column align-self-start mt-6 ml-3 mr-auto" 
     style="width: 400px;"
   >
     <!-- Password change -->
@@ -222,15 +243,20 @@
 
 <v-spacer class="my-16"></v-spacer>
 
-<v-divider class="my-4"/>
-<!-- response -->
-<div class="d-flex flex-column justify-center align-center">
-  
-  <!-- title -->
-  <p class=" text-h5 font-weight-black align-self-center">
-    我发布的响应
-  </p>
+<v-spacer class="my-4"/>
 
+<!-- title -->
+<p class="text-h5 font-weight-black align-self-center ml-3">
+  全部回复
+</p>
+
+<!-- post content -->
+<div class="my-2">
+  <v-row>
+    <v-col v-for="(value, key) in Reply" class="ma-2">
+      <poster :id="Number(key)" :data="value"/>
+    </v-col>
+  </v-row>
 </div>
 
 </template>
@@ -238,6 +264,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import Poster from '@/components/poster/ReplyPoster.vue'
+
 import * as QUERY from '@/plugins/query'
 import {assert} from '@/plugins/query'
 
@@ -263,19 +291,18 @@ const Input = reactive({
 
 
 const Latest = reactive({
-  date: '2023.11.28',
-  brief: 'Brief',
-  loc1:'北京市',
-  loc2:'海淀区',
-  imgs: ['https://cdn.vuetifyjs.com/images/cards/house.jpg', 
-    'https://cdn.vuetifyjs.com/images/cards/road.jpg',
-    'https://cdn.vuetifyjs.com/images/cards/plane.jpg'
-  ],
+  flag: false,
+  request_id: '',
+  date: '',
+  brief: '',
+  city: '',
+  img: 'https://cdn.vuetifyjs.com/images/cards/plane.jpg'
 })
 
 
 const Update = ref(false);
 const Change = ref(false);
+const Reply = reactive({})
 
 const rules = {
   required: (value) => !!value || '不能为空',
@@ -360,12 +387,60 @@ const input_assert = computed(() => {
          rules.match() === true;
 })
 
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
+function randomImage(data) {
+  const len = data.length;
+  if(len == 0) return null;
+  const index = getRandomInt(len - 1);
+  return QUERY.fileURL(data[index].id);
+}
+
+function fetchLatest() {
+  QUERY.get('/api/user/request/query_lasted', {}, 'poster_id')
+  .then(data => {
+    console.log(data)
+    if(data.data.length == 0) {
+      Latest.flag = false;
+      return;
+    }
+    Latest.flag = true;
+    Latest.date = data.data.latest_response_time;
+    Latest.city = data.data.city;
+    Latest.request_id = data.data.id;
+    if(data.data.image_files.length > 0) {
+      Latest.img = randomImage(data.data.image_files)
+    }
+    Latest.brief = data.data.brief
+  }) 
+}
+
+function checkLatest() {
+  Router.push('/home/detail/' + Latest.request_id)
+}
+
+
+function fetchReply(){
+  QUERY.get('/api/user/response/query_brief', {
+    page : 1,
+    responder_id : UserData.id
+  })
+  .then(data => {
+    console.log(data)
+    data.data.forEach(element => {
+      Reply[element.id] = element;
+    })
+  })
+}
+
 onMounted(() => {
   if(!assert()) {
     Router.push('/login');
     return;
   }
-  
+
   QUERY.get('/api/user/info', {}, 'user_id')
   .then(data => {
     QUERY.set_user_city(data.data.register_city);
@@ -378,5 +453,7 @@ onMounted(() => {
     resetUpdate();
     resetChange();
   })
+  fetchLatest();
+  fetchReply();
 })
 </script>

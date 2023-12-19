@@ -39,7 +39,7 @@
   <div class="my-2">
     <v-row>
       <v-col v-for="(value, key) in Posts" class="ma-2">
-        <poster :id="Number(key)" :data="value"/>
+        <poster :id="Number(key)" :data="value" :tag-action="newQuery"/>
       </v-col>
     </v-row>
   </div>
@@ -49,7 +49,7 @@
   <v-pagination 
     v-model="PageVal"
     :length="PageLen"
-    @update:model-value="newQuery"
+    @update:model-value="()=>{newQuery()}"
   />
 </div>
 <v-dialog style="backdrop-filter: blur(10px);"
@@ -94,11 +94,14 @@ const Posts = reactive({})
 var Tags = [];
 
 ///// query 
-function newQuery(tags = null) {
+function newQuery(tags = []) {
+  if(!assertTags(Tags, tags)) {
+    PageVal.value = 1;
+  }
   let query = {
     page: PageVal.value
   }
-  if(tags != null && tags.length > 0) {
+  if(tags && tags.length > 0) {
     query.search = tags;
   } 
   Router.push({
@@ -138,7 +141,7 @@ function fetchData(){
     Object.keys(Posts).forEach(key => {
       delete Posts[key];
     })
-    RefLoading.value.hide();
+    RefLoading && RefLoading.value.hide();
 
     PageLen.value = data.total_pages;
 
@@ -156,6 +159,19 @@ function fetchData(){
   })
 }
 
+///// tags assert
+function assertTags(old_, new_) {
+  try{
+    if(new_.length != old_.length) return false;
+    new_.forEach(element => {
+      if(!old_.includes(element)) return false;
+    });
+    return true;
+  }catch(err) {
+    return true;
+  }
+}
+
 ///// Route parse
 function parseRoute(query) {
   let data = {
@@ -166,7 +182,7 @@ function parseRoute(query) {
   if(data.page < 1) data.page = 1;
 
   if(query.search) {
-    data.search = query.search.split(' ');
+    data.search = query.search;
   }
 
   // console.log({

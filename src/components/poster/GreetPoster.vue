@@ -42,7 +42,7 @@
         <div class="d-flex">
           <v-chip size="small" v-for="(tag, index) in Data.tags"
             class="mr-1" color="grey" style="z-index:9"
-            @click="console.log(1)"
+            @click.stop="tagClick(tag)"
           > 
             <strong class="text-blue-accent-3">#</strong>
             <p class="text-black">{{ tag }}</p>
@@ -69,16 +69,23 @@ const props = defineProps({
   data: {
     type: Object,
     required: true
+  },
+  tagAction: {
+    type: Function,
+    default: () => {}
   }
 })
 
-const StatusString = [
-  {text:'进行中', color:'green'},
-  {text:'已完成', color:'blue-accent-3'},
-  {text:'已取消', color:'red'},
-  {text:'已过期', color:'grey'}
-]
+// const StatusString = [
+//   {text:'进行中', color:'green'},
+//   {text:'已完成', color:'blue-accent-3'},
+//   {text:'已取消', color:'red'},
+//   {text:'已过期', color:'grey'}
+// ]
 
+function tagClick(tag) {
+  props.tagAction([tag]);
+}
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
