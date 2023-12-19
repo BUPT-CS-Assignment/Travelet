@@ -18,10 +18,10 @@
     
   </div>
   
-  
-  <p class="align-self-center text-caption text-grey-darken-2">
-    Page {{ PageVal }} / {{ PageLen }}
+  <p class="align-self-center text-caption text-grey-darken-2 mt-2">
+    第 {{ PageVal }} 页 / 共 {{ PageLen }} 页
   </p>
+  
   
   <!-- search bar -->
   <div style="min-width: 400px; max-width: 600px;" class="align-self-center">
@@ -86,7 +86,6 @@ const Router = useRouter();
 const RefLoading = ref(null);
 const RefTagsInput = ref(null);
 const PageLen = ref(undefined);
-const TotalNum = ref(0);
 
 ///// v-model
 const PageVal = ref(1);
@@ -94,50 +93,7 @@ const Dialog = ref(false);
 const Posts = reactive({})
 var Tags = [];
 
-function newQuery(tags = null) {
-  console.log(tags)
-  let query = {
-    page: PageVal.value
-  }
-  if(tags != null && tags.length > 0) {
-    query.search = tags.join(' ');
-  }
-  Router.push({
-    path: '/home/explore',
-    query: query
-  })
-}
-
-function fetchData(){
-  RefLoading.value.show();
-
-  let params = { page : PageVal.value }
-  if(Tags.length > 0) {
-    params.str = Tags.join(' ');
-  }
-
-  QUERY.get('/api/user/request/query_brief', params, 'poster_id')
-  .then(data => {
-    console.log(data)
-
-    Object.keys(Posts).forEach(key => {
-      delete Posts[key];
-    })
-    RefLoading.value.hide();
-
-    PageLen.value = data.total_pages;
-    TotalNum.value = (data.total_pages - 1) * 5 + data.data.length;
-
-    data.data.forEach(element => {
-      Posts[element.id] = element
-    });
-  })
-  .catch(err => {
-    alert(err);
-    Router.push('/home');
-  })
-}
-
+///// Route parse
 function parseRoute(query) {
   let data = {
     page: 1,
@@ -150,12 +106,72 @@ function parseRoute(query) {
     data.search = query.search.split(' ');
   }
 
-  console.log({
-    origin: query,
-    parsed: data
-  })
+  // console.log({
+  //   origin: query,
+  //   parsed: data
+  // })
   return data;
 }
+
+
+///// query 
+function newQuery(tags = null) {
+  let query = {
+    page: PageVal.value
+  }
+  if(tags != null && tags.length > 0) {
+    query.search = tags.join(' ');
+  }
+  Router.push({
+    path: '/home/explore',
+    query: query
+  })
+}
+
+///// apply server query
+function applyQuery(query) {
+  PageVal.value = query.page;
+  Tags = query.search;
+  RefTagsInput.value.setData(Tags);
+  fetchData();
+}
+
+
+///// fetch from server
+function fetchData(){
+  RefLoading.value.show();
+
+  let params = { page : PageVal.value }
+  if(Tags.length > 0) {
+    params.str = Tags.join(' ');
+  }
+  console.log(params);
+
+  QUERY.get('/api/user/request/query_brief', params, 'poster_id')
+  .then(data => {
+    console.log(data)
+    if(PageVal.value > data.total_pages) {
+      PageVal.value = data.total_pages;
+      return newQuery(Tags);
+    }
+
+    Object.keys(Posts).forEach(key => {
+      delete Posts[key];
+    })
+    RefLoading.value.hide();
+
+    PageLen.value = data.total_pages;
+
+    data.data.forEach(element => {
+      Posts[element.id] = element
+    });
+  })
+  .catch(err => {
+    alert(err);
+    Router.push('/home');
+  })
+}
+
 
 function assertTags(new_tag, old_tag) {
   if(new_tag.length != old_tag.length)
@@ -164,13 +180,6 @@ function assertTags(new_tag, old_tag) {
     if(!(tag in old_tag)) return false;
   })
   return true;
-}
-
-function applyQuery(query) {
-  PageVal.data = query.page;
-  Tags = query.search;
-  RefTagsInput.value.setData(Tags);
-  fetchData();
 }
 
 onMounted(() => {

@@ -5,8 +5,11 @@
     有朋自远方来
   </p>
 
-  <p class="align-self-center text-body-2 text-grey-darken-2">
+  <p class="align-self-center text-body-2 text-grey-darken-2 mt-2">
     {{ UserCity }}
+  </p>
+  <p class="align-self-center text-caption text-grey-darken-2">
+    第 {{ PageVal }} 页 / 共 {{ PageLen }} 页
   </p>
 
     <!-- search bar -->
@@ -62,7 +65,6 @@ const Router = useRouter();
 ///// const values
 const UserCity = ref('');
 const PageLen = ref(undefined);
-const TotalNum = ref(0);
 
 ///// ref
 const RefTagsInput = ref(null);
@@ -75,7 +77,6 @@ const Posts = reactive({})
 var Tags = [];
 
 function newQuery(tags = null) {
-  console.log(tags)
   let query = {
     page: PageVal.value
   }
@@ -102,6 +103,8 @@ function fetchData(){
   if(Tags.length > 0) {
     params.str = Tags.join(' ');
   }
+
+  console.log(params);
   QUERY.get('/api/user/request/query_brief', params)
   .then(data => {
     console.log(data)
@@ -112,7 +115,6 @@ function fetchData(){
     RefLoading.value.hide();
 
     PageLen.value = data.total_pages;
-    TotalNum.value = (data.total_pages - 1) * 5 + data.data.length;
 
     data.data.forEach(element => {
       Posts[element.id] = element
@@ -135,7 +137,7 @@ function parseRoute(query) {
   if(query.search) {
     data.search = query.search.split(' ');
   }
-  console.log(data);
+  // console.log(data);
   return data;
 }
 
@@ -149,7 +151,7 @@ function assertTags(new_tag, old_tag) {
 }
 
 function applyQuery(query) {
-  PageVal.data = query.page;
+  PageVal.value = query.page;
   Tags = query.search;
   RefTagsInput.value.setData(Tags);
   fetchData();
@@ -173,7 +175,7 @@ onMounted(() => {
 
   // watch router change
   watch(() => Route.query, (newVal, oldVal) => {
-    console.log(newVal);
+    // console.log(newVal);
     // console.log(oldVal);
 
     let newData = parseRoute(newVal);
