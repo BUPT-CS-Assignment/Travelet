@@ -14,9 +14,18 @@ function set_user_id(uid) {
   localStorage.setItem('userid', uid);
 }
 
+function get_user_city() {
+  return localStorage.getItem('usercity');
+}
+
+function set_user_city(city) {
+  localStorage.setItem('usercity', city);
+}
+
 function clear() {
   localStorage.removeItem('userid');
   localStorage.removeItem('username');
+  localStorage.removeItem('usercity');
 }
 
 function assert() {
@@ -86,4 +95,4 @@ function post(url, data, identifier = null, json = true, headers = {}) {
   })
 }
 
-export {get, post, fileURL, set_user_id, get_user_id, set_user_name, get_user_name, clear, assert}
+export {get, post, fileURL, set_user_id, get_user_id, set_user_name, get_user_name, get_user_city, set_user_city, clear, assert}

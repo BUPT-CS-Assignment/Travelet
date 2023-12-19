@@ -20,15 +20,16 @@
   
   
   <p class="align-self-center text-caption text-grey-darken-2">
-    Page {{ CurPage }} / {{ PageLen }}
+    Page {{ PageVal }} / {{ PageLen }}
   </p>
   
   <!-- search bar -->
   <div style="min-width: 400px; max-width: 600px;" class="align-self-center">
     <v-divider class="my-6" />
     <TagBar class="align-self-center mb-4" style="height: 90px;"
+      ref="RefTagsInput"
       :tags="TagsPreset"
-      :action="doSearch"
+      :action="newQuery"
     />
   </div>
 
@@ -46,8 +47,9 @@
 
   <!-- page navigation -->
   <v-pagination 
-    v-model="CurPage"
+    v-model="PageVal"
     :length="PageLen"
+    @update:model-value="newQuery"
   />
 </div>
 <v-dialog style="backdrop-filter: blur(10px);"
@@ -62,57 +64,134 @@
     :onComplete="()=>{Dialog=false; refresh();}"
   ></new-request>
 </v-dialog>
+<Loading ref="RefLoading"></Loading>
 </template>
 
 <script setup>
-import {ref, reactive, onMounted} from 'vue';
-import { useRouter } from 'vue-router';
+import {ref, reactive, onMounted, watch} from 'vue';
+import { useRoute, useRouter  } from 'vue-router';
 import TagBar from '@/components/util/TagBar.vue'
 import Poster from '@/components/poster/ExplorePoster.vue';
 import NewRequest from '@/components/NewRequest.vue'
+import Loading from '@/components/util/Loading.vue';
 
 import TagsPreset from '@/plugins/tags'
 import * as QUERY from '@/plugins/query'
 
+///// router
+const Route = useRoute();
 const Router = useRouter();
 
-const PageLen = ref(1);
-const CurPage = ref(1);
+///// ref
+const RefLoading = ref(null);
+const RefTagsInput = ref(null);
+const PageLen = ref(undefined);
+const TotalNum = ref(0);
+
+///// v-model
+const PageVal = ref(1);
 const Dialog = ref(false);
-
 const Posts = reactive({})
+var Tags = [];
 
-function doSearch(tags){
-  Object.keys(Posts).forEach(key => {
-    delete Posts[key];
+function newQuery(tags = null) {
+  console.log(tags)
+  let query = {
+    page: PageVal.value
+  }
+  if(tags != null && tags.length > 0) {
+    query.search = tags.join(' ');
+  }
+  Router.push({
+    path: '/home/explore',
+    query: query
   })
-  QUERY.get('/api/user/request/query_brief', {
-    page : CurPage.value,
-    str : tags.join(' '),
-  }, 'poster_id')
-  .then(data => {
-    console.log(data)
-    data.data.forEach(element => {
-      Posts[element.id] = element
-    });
-  }) 
 }
 
-function refresh() {
-  QUERY.get('/api/user/request/query_brief', {
-    page : 1,
-  }, 'poster_id')
+function fetchData(){
+  RefLoading.value.show();
+
+  let params = { page : PageVal.value }
+  if(Tags.length > 0) {
+    params.str = Tags.join(' ');
+  }
+
+  QUERY.get('/api/user/request/query_brief', params, 'poster_id')
   .then(data => {
     console.log(data)
+
+    Object.keys(Posts).forEach(key => {
+      delete Posts[key];
+    })
+    RefLoading.value.hide();
+
     PageLen.value = data.total_pages;
+    TotalNum.value = (data.total_pages - 1) * 5 + data.data.length;
+
     data.data.forEach(element => {
       Posts[element.id] = element
     });
-  }) 
+  })
+  .catch(err => {
+    alert(err);
+    Router.push('/home');
+  })
+}
+
+function parseRoute(query) {
+  let data = {
+    page: 1,
+    search: []
+  }
+  if(query.page != undefined) data.page = Number(query.page);
+  if(data.page < 1) data.page = 1;
+
+  if(query.search) {
+    data.search = query.search.split(' ');
+  }
+
+  console.log({
+    origin: query,
+    parsed: data
+  })
+  return data;
+}
+
+function assertTags(new_tag, old_tag) {
+  if(new_tag.length != old_tag.length)
+    return false;
+  new_tag.forEach((tag, idx) => {
+    if(!(tag in old_tag)) return false;
+  })
+  return true;
+}
+
+function applyQuery(query) {
+  PageVal.data = query.page;
+  Tags = query.search;
+  RefTagsInput.value.setData(Tags);
+  fetchData();
 }
 
 onMounted(() => {
-  refresh();
+  applyQuery(parseRoute(Route.query));
+  
+  watch(() => Route.query, (newVal, oldVal) => {
+    // console.log(newVal);
+    // console.log(oldVal);
+
+    let newData = parseRoute(newVal);
+    let oldData = parseRoute(oldVal);
+    
+    if(!assertTags(newData.search, oldData.search)) {
+      PageVal.value = 1;
+      newQuery(newData.search);
+    } else if(newData.page == oldData.page) {
+      return;
+    }
+
+    applyQuery(newData);
+  })
 })
 
 

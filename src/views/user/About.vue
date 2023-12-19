@@ -368,6 +368,8 @@ onMounted(() => {
   
   QUERY.get('/api/user/info', {}, 'user_id')
   .then(data => {
+    QUERY.set_user_city(data.data.register_city);
+
     let cities = String(data.data.register_city).split(',')
     UserData.loc1 = cities[0]
     UserData.loc2 = cities[1]

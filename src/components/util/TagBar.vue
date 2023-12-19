@@ -7,7 +7,7 @@
     <template v-slot:prepend-inner>
       <v-btn :icon="props.icon" variant="text"
         color="grey"
-        @click="props.action(tags)"
+        @click.stop="props.action(tags)"
       />
     </template>
     <template v-slot:selection="{ attrs, item, select, selected }">
@@ -21,10 +21,6 @@ import {ref, onMounted} from 'vue';
 
 const props = defineProps({
   tags: {
-    type: Array,
-    default: []
-  },
-  preset: {
     type: Array,
     default: []
   },
@@ -45,6 +41,11 @@ const props = defineProps({
 const TagsPreset = ref([]);
 const tags = ref([]);
 
+// set default
+function setData(data) {
+  tags.value = data;
+}
+
 // on mounted
 onMounted(() => {
   TagsPreset.value = props.tags;
@@ -55,7 +56,8 @@ onMounted(() => {
 defineExpose({
   getData: () => {
     return tags.value;
-  }
+  },
+  setData
 })
 
 </script>

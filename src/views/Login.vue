@@ -114,15 +114,16 @@ function login() {
     password: Input.pwd
   })
   .then(res => {
-    if(res.status == 0){
-      QUERY.set_user_name(Input.usr);
-      QUERY.set_user_id(res.user_id);
-      if(Input.usr == 'admin')
-        Router.push('/admin');
-      else
-        Router.push('/home');
-    }
-    else alert('用户名或密码错误');
+    QUERY.set_user_name(Input.usr);
+    QUERY.set_user_id(res.user_id);
+    
+    if(Input.usr == 'admin')
+      Router.push('/admin');
+    else
+      Router.push('/home');
+  })
+  .catch(err => {
+    alert(err);
   })
 }
   
