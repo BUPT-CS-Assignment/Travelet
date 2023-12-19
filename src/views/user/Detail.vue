@@ -4,15 +4,15 @@
     <!-- status & location -->
     <div class="d-flex flex-row mb-3">
       <v-chip label variant="flat" 
-        :color="StatusString[Request.status].color"
+        :color="StatusString[BindData.status].color"
       >
-        {{ StatusString[Request.status].text }}
+        {{ StatusString[BindData.status].text }}
       </v-chip>
 
       <v-chip class="ml-3 font-weight-bold" 
         label color="grey-darken-2"
       >
-        {{ Request.location }}
+        {{ BindData.location }}
       </v-chip>
     </div>
 
@@ -24,28 +24,28 @@
       >
         <!-- title -->
         <p class="text-h3 font-weight-bold mb-2" style="word-break: break-all;">
-          {{ Request.biref }}
+          {{ BindData.biref }}
         </p>
 
         <!-- date -->
         <p class="text-subtitle-2 my-1">
-          发布时间: {{ Request.create_time }}
+          发布时间: {{ BindData.create_time }}
         </p>
 
         <!-- date -->
         <p class="text-subtitle-2 my-1">
-          修改时间: {{ Request.modify_time }}
+          修改时间: {{ BindData.modify_time }}
         </p>
 
         <!-- <p class="text-blue-accent-2 text-subtitle-2 my-1">
-          RESPONSED: {{ Response.date }}
+          RESPONSED: {{ BindReply.date }}
         </p> -->
         
         <v-divider width=300 class="mt-4 mb-2" />
 
         <!-- tags -->
         <div class="d-flex flex-row flex-wrap">
-          <template v-for="(tag, index) in Request.tags">
+          <template v-for="(tag, index) in BindData.tags">
             <p class="mr-2 text-body-2 font-weight-bold">
               <strong class="text-blue-accent-3">#</strong>
               {{ tag }}
@@ -60,15 +60,15 @@
       <div class="flex-grow-1 mx-auto" 
         style="min-width: 400px; max-width: 800px;"
       >
-        <v-carousel v-if="Request.images.length > 0"
+        <v-carousel v-if="BindData.images.length > 0"
           cycle show-arrows="hover"
           hide-delimiter-background
           height="200"
         >
-          <v-carousel-item v-for="(item, index) in Request.images">
-            <v-img :src="QUERY.fileURL(item.id)"
+          <v-carousel-item v-for="(item, index) in BindData.images">
+            <v-img :src="QUERY.fileURL(item.id)" cover
               lazy-src="https://fakeimg.pl/400x300/?retina=1&text=image&font=lobster"
-              @click="checkImage(item.id)"
+              @click="RefImageAmp.url(item.id)"
             ></v-img>
           </v-carousel-item>
 
@@ -80,40 +80,41 @@
     <v-spacer class="my-3"/>
 
     <!-- desc -->
-    <v-card variant="tonal" color="grey"> 
-      <v-card-title class="d-flex text-grey-darken-2">
-        描述
-      </v-card-title>
-      <v-card-text class="d-flex text-grey-darken-2">
-        {{ Request.desc }}
-      </v-card-text>
-    </v-card>
+    <template v-if="!Modify">
+      <div>
+        <p>{{ BindData.desc }}</p>
+      </div>
+    </template>
+    <template v-if="Modify">
 
-    
+    </template>    
 
     <!-- personal response -->
-    <template v-if="!is_poster && Response.personal">
+    <template v-if="!checkIsPoster">
       <v-divider class="my-4"/>
-      <p class="ml-2 text-h6 font-weight-bold">我的响应</p>
-      <detail-response 
-        :uid="Response.personal" 
-        :modified="Request.status == 0"
-      />
-    </template>
-    <template v-else-if="!is_poster && Request.status == 0">
-      <template v-if="!Dialog && Loaded">
-        <v-divider class="my-4"/>
-        <v-btn class="mb-4" elevation="0" color="blue-accent-2" @click="Dialog = true">
-          去响应
-        </v-btn>
+      <template v-if="BindReply.personal">
+        <p class="ml-2 text-h6 font-weight-bold">我的响应</p>
+        <response-view 
+          :response_id="BindReply.personal" 
+          :modified="BindData.status == 0"
+        />
       </template>
-      <template v-else-if="Dialog">
-        <v-divider class="my-4"/>
-        <NewResponse
-          :request="POST_ID"
-          :onCancel="()=>{Dialog=false;}"
-          :onComplete="()=>{Dialog=false;}"
-        ></NewResponse>
+      <template v-else-if="Status.loaded">
+        <template v-if="!Status.dialog">
+          <v-btn class="mb-4" elevation="0" color="blue-accent-2" @click="Status.dialog = true">
+            去响应
+          </v-btn>
+        </template>
+        <template v-else>
+          <response-view 
+            modify_at_init
+            :modified="true"
+            :responder_id="USER_ID"
+            :request_id="REQUEST_ID" 
+            :on_cancel="()=>{Status.dialog=false;}"
+            :on_success="()=>{Status.dialog=false;}"
+          />
+        </template>
       </template>
     </template>
     
@@ -122,34 +123,38 @@
     <!-- all responses -->
     <div>
       <p class="ml-2 mt-10 text-h6 font-weight-bold">所有响应</p>
-      <template v-for="(uid, index) in Response.rest">
+      <template v-for="(uid, index) in BindReply.rest">
         <v-divider class="my-3"/>
-        <div>
-          <detail-response :uid="Number(uid)" :acceptable="is_poster"></detail-response>
-        </div>
+        <response-view 
+          :response_id="uid" 
+          :modified="BindData.status == 0"
+          :acceptable="checkIsPoster"
+        />
       </template>
     </div>
   </div>
 </div>
 
-<check-dialog ref="CheckRef" />
+<image-amp ref="RefImageAmp"></image-amp>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useRoute, useRouter  } from 'vue-router';
-import DetailResponse from '@/components/DetailResponse.vue'
-import NewResponse from '@/components/NewResponse.vue';
-import CheckDialog from '@/components/CheckImage.vue';
+import ResponseView from '@/components/Response.vue'
+import ImageAmp from '@/components/util/ImageAmp.vue';
+
 import * as FILES from '@/plugins/files'
 import * as QUERY from '@/plugins/query'
 import {assert} from '@/plugins/query'
 
-
+///// router
 const Route = useRoute();
-const POST_ID = Route.params.id;
 const Router = useRouter();
 
+///// const values
+const REQUEST_ID = Number(Route.params.id);
+const USER_ID = Number(QUERY.get_user_id());
 const StatusString = [
   {text:'进行中', color:'green'},
   {text:'已完成', color:'blue-accent-3'},
@@ -158,7 +163,23 @@ const StatusString = [
   {text:'加载中', color:'grey'}
 ]
 
-const Request = reactive({
+///// ref
+const Status = reactive({
+  dialog: false,
+  loaded: false,
+  modify: false
+})
+const RefImageAmp = ref(null);
+
+///// v-model
+const BindInput = reactive({
+  tags: [],
+  desc: '',
+  images: [],
+  files: []
+})
+
+const BindData = reactive({
   poster_id: NaN,
   location: '',
   tags: [],
@@ -171,34 +192,62 @@ const Request = reactive({
   files: []
 })
 
-const Dialog = ref(false);
-const Loaded = ref(false);
-const CheckRef = ref(null);
-
-const is_poster = computed(() => {
-  return QUERY.get_user_id() == Request.poster_id;
-})
-
-const Response = reactive({
+const BindReply = reactive({
   personal: NaN,
   accepted: NaN,
   rest: []
 })
 
-function checkImage(idx) {
-  CheckRef.value.check(idx);
+///// rules
+const checkIsPoster = computed(() => {
+  return USER_ID == BindData.poster_id;
+})
+
+///// functions
+function resetInput() {
+  Input.tags = BindData.tags;
+  Input.desc = BindData.desc;
+  Input.images = BindData.images;
+  Input.files = BindData.files;
 }
 
+
+
+
+
 function filterResponse(data) {
-  Response.personal = NaN;
-  Response.rest = []
+  BindReply.personal = NaN;
+  BindReply.rest = []
   data.forEach(element => {
-    if(element.responder_id == QUERY.get_user_id()) {
-      Response.personal = element.id;
-    } else if(element.id != Response.accepted) {
-      Response.rest.push(element.id);
+    if(element.responder_id == USER_ID) {
+      BindReply.personal = element.id;
+    } else if(element.id != BindReply.accepted) {
+      BindReply.rest.push(element.id);
     }
   });
+}
+
+function init() {
+  QUERY.get('/api/user/request/query_detail',{
+    request_id : REQUEST_ID
+  })
+  .then(data => {
+    console.log(data)
+    const info = data.data;
+    BindData.poster_id = Number(info.poster_id);
+    BindData.location = info.city;
+    BindData.create_time = info.create_time;
+    BindData.modify_time = info.modify_time;
+    BindData.biref = info.title;
+    BindData.tags = info.tags;
+    BindData.desc = info.description;
+    BindData.status = info.status;
+    BindData.images = info.image_files;
+    BindData.files = info.raw_files;
+    BindReply.accepted = info.accepted_response_id;
+    filterResponse(info.pending_responses);
+    Status.loaded = true;
+  })
 }
 
 onMounted(() => {
@@ -207,26 +256,7 @@ onMounted(() => {
     return;
   }
   
-  QUERY.get('/api/user/request/query_detail',{
-    request_id : POST_ID
-  })
-  .then(data => {
-    console.log(data)
-    const info = data.data;
-    Request.poster_id = Number(info.poster_id);
-    Request.location = info.city;
-    Request.create_time = info.create_time;
-    Request.modify_time = info.modify_time;
-    Request.biref = info.title;
-    Request.tags = info.tags;
-    Request.desc = info.description;
-    Request.status = info.status;
-    Request.images = info.image_files;
-    Request.files = info.raw_files;
-    Response.accepted = info.accepted_response_id;
-    filterResponse(info.pending_responses);
-    Loaded.value = true;
-  })
+  init();
 })
 
 </script>

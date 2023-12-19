@@ -65,11 +65,11 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import Logo from '@/components/Logo.vue';
+import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import Logo from '@/components/util/Logo.vue';
+
 import * as QUERY from '@/plugins/query'
-import { computed } from 'vue';
 
 
 const Router = useRouter();

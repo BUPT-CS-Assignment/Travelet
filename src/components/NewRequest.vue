@@ -156,8 +156,9 @@
 
 <script setup>
 import { ref, reactive } from 'vue';
-import RegionSelect from './RegionSelect.vue';
-import TagBar from './TagBar.vue';
+import RegionSelect from '@/components/util/RegionSelect.vue';
+import TagBar from '@/components/util/TagBar.vue';
+
 import TagsPreset from '@/plugins/tags'
 import * as FILES from '@/plugins/files'
 import * as QUERY from '@/plugins/query'

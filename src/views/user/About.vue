@@ -66,12 +66,12 @@
 
   <!-- user info -->
   <div class="d-flex flex-column align-self-start mt-6 mr-auto" 
-    style="width: 33%; min-width: 300px"
+    style="width: 400px;"
   >
     <!-- Password change -->
     <v-card variant="outlined" rounded="lg" color="grey-lighten-1"
       style="border: 2px dashed; background-color: #fafafa;"
-      width="300px" class="pa-4"
+      class="pa-4"
     >
       <div class="text-black text-caption">
         <template v-if="!Change">
@@ -118,7 +118,7 @@
               <p class="text-caption font-weight-bold">取消</p>
             </v-btn>
             <v-btn color="blue-accent-3" size="small" elevation="0" class="ml-2"
-              :disabled="!assert" @click="postChange"
+              :disabled="!input_assert" @click="postChange"
             >
               <p class="text-caption font-weight-bold">确认</p>
             </v-btn>
@@ -211,7 +211,7 @@
           <p class="text-subtitle-1">取消</p>
         </v-btn>
         <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0"
-          :disabled="!assert2" @click="postUpdate"
+          :disabled="!input_assert2" @click="postUpdate"
         >
           <p class="text-subtitle-1">确认</p>
         </v-btn>
@@ -238,6 +238,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import * as QUERY from '@/plugins/query'
+import {assert} from '@/plugins/query'
 
 const UserData = reactive({
   name: QUERY.get_user_name(),
@@ -288,14 +289,14 @@ function resetUpdate() {
   Update.value = false;
 }
 
-const assert2 = computed(() => {
+const input_assert2 = computed(() => {
   return rules.lim(Input.phone) === true &&
          (Input.phone !== UserData.phone ||
          Input.intro !== UserData.intro);
 })
 
 function postUpdate() {
-  if(!assert2) {
+  if(!input_assert2) {
     alert('请检查输入');
     return;
   }
@@ -330,7 +331,7 @@ function resetChange() {
 }
 
 function postChange() {
-  if(!assert) {
+  if(!input_assert) {
     alert('请检查输入');
     return;
   }
@@ -347,7 +348,7 @@ function postChange() {
   })
 }
 
-const assert = computed(() => {
+const input_assert = computed(() => {
   return rules.required(Input.pwd) === true &&
          rules.required(Input.pwd2) === true &&
          rules.min(Input.pwd === true) &&
@@ -357,6 +358,11 @@ const assert = computed(() => {
 })
 
 onMounted(() => {
+  if(!assert()) {
+    Router.push('/login');
+    return;
+  }
+  
   QUERY.get('/api/user/info', {}, 'user_id')
   .then(data => {
     let cities = String(data.data.register_city).split(',')

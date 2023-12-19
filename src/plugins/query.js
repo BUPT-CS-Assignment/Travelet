@@ -47,10 +47,12 @@ function get(url, param = {}, identifier = null) {
     fetch(url_encode)
     .then(response => response.json())
     .then(data => {
-      resolve(data)
+      if(data.status == 0) resolve(data)
+      else throw data.message;
     })
     .catch(err => {
-      console.log(err)
+      console.log(err);
+      throw err;
     })
   })
 }
@@ -74,10 +76,12 @@ function post(url, data, identifier = null, json = true, headers = {}) {
     })
     .then(response => response.json())
     .then(data => {
-      resolve(data)
+      if(data.status == 0) resolve(data)
+      else throw data.message;
     })
     .catch(err => {
-      console.log(err)
+      console.log(err);
+      throw err;
     })
   })
 }

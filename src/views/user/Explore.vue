@@ -57,22 +57,21 @@
   transition="dialog-bottom-transition"
   v-model="Dialog"
 > 
-  <NewPost
+  <new-request
     :onCancel="()=>{Dialog=false;}"
     :onComplete="()=>{Dialog=false; refresh();}"
-  ></NewPost>
+  ></new-request>
 </v-dialog>
 </template>
 
 <script setup>
 import {ref, reactive, onMounted} from 'vue';
 import { useRouter } from 'vue-router';
+import TagBar from '@/components/util/TagBar.vue'
+import Poster from '@/components/poster/ExplorePoster.vue';
+import NewRequest from '@/components/NewRequest.vue'
 
-import TagBar from '@/components/TagBar.vue'
-import Poster from '@/components/RequestPoster.vue';
-import NewPost from '@/components/NewPost.vue'
 import TagsPreset from '@/plugins/tags'
-
 import * as QUERY from '@/plugins/query'
 
 const Router = useRouter();

@@ -44,12 +44,12 @@
 </template>
 
 <script setup>
-import {ref, reactive} from 'vue';
-import TagBar from '@/components/TagBar.vue'
-import Poster from '@/components/ResponsePoster.vue';
+import {ref, reactive, onMounted} from 'vue';
+import TagBar from '@/components/util/TagBar.vue'
+import Poster from '@/components/poster/GreetPoster.vue';
+
 import TagsPreset from '@/plugins/tags'
 import * as QUERY from '@/plugins/query'
-import { onMounted } from 'vue';
 
 const PageLen = ref(1);
 const CurPage = ref(1);

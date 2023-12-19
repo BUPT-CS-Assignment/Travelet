@@ -42,9 +42,9 @@
 </template>
 
 <script setup>
-import {ref, reactive, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import Logo from '@/components/Logo.vue';
+import Logo from '@/components/util/Logo.vue';
 import {assert, clear} from '@/plugins/query'
 
 const Router = useRouter();

@@ -17,10 +17,14 @@
 </template>
 
 <script setup>
-import {ref, onMounted, watch, toRaw} from 'vue';
+import {ref, onMounted} from 'vue';
 
 const props = defineProps({
   tags: {
+    type: Array,
+    default: []
+  },
+  preset: {
     type: Array,
     default: []
   },
@@ -44,6 +48,7 @@ const tags = ref([]);
 // on mounted
 onMounted(() => {
   TagsPreset.value = props.tags;
+  tags.value = props.preset;
 })
 
 // expose
