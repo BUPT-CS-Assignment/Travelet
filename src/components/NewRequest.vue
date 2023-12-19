@@ -134,12 +134,14 @@
       <v-btn @click="prev" :disabled="Step == 1" variant="text" width="80">
         <p class="text-subtitle-1 font-weight-bold">上一步</p>
       </v-btn>
-      <v-btn @click="props.onCancel" class="ml-auto mr-4" variant="text" color="red" width="80">
+      <v-btn @click="props.onCancel" class="ml-auto mr-4" variant="text" color="red" width="80" :disabled="OnUploading">
         <p class="text-subtitle-1 font-weight-bold">取消</p>
       </v-btn>
       <template v-if="Step >= Steps.length">
-        <v-btn @click="upload" variant="flat" width="80" color="blue-accent-3">
-          <p class="text-subtitle-1 font-weight-bold">发布</p>
+        <v-btn @click="upload" variant="flat" width="80" color="blue-accent-3" :disabled="OnUploading">
+          <p class="text-subtitle-1 font-weight-bold">
+            {{ OnUploading ? '请稍后' : '发布' }}
+          </p>
         </v-btn>
       </template>
       <template v-else>
@@ -186,6 +188,7 @@ const RegionSelectRef = ref(null);
 const ImageInputRef = ref(null);
 const FileInputRef = ref(null);
 const TagsInputRef = ref(null);
+const OnUploading = ref(false);
 
 const Step = ref(1);
 const Steps = ['Step1', 'Step2', 'Step3', 'Step4'];
@@ -260,6 +263,9 @@ function upload() {
   .then(res => {
     alert('发布成功');
     props.onComplete();
+  })
+  .catch(err => {
+    alert(err);
   })
 }
 

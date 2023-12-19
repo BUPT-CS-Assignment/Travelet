@@ -8,7 +8,7 @@
     class="d-flex flex-column align-center justify-center"
   >
     <p class="text-h6 mb-2 text-white">{{ props.text }}</p>
-    <v-progress-circular  
+    <v-progress-linear   
       rounded
       height="6"
       indeterminate

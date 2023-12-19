@@ -139,12 +139,13 @@
       <v-list-item v-for="(file, index) in BindData.files" :key="index"
         :title="file.filename"
         :subtitle="FILES.formatFileSize(file.size)"
+        @click="QUERY.download(file.id)"
       >
         <template v-slot:prepend>
           <v-icon color="grey-darken-3"> {{ FILES.iconFileType(file.mime) }} </v-icon>
         </template>
         <template v-if="Status.modify" v-slot:append>
-          <v-btn @click="serverFileRemove(index)" icon="" variant="text" color="red" size="small">
+          <v-btn @click.stop="serverFileRemove(index)" icon="" variant="text" color="red" size="small">
             <v-icon size="large">mdi-close</v-icon>
           </v-btn>
         </template>
@@ -178,7 +179,7 @@
     <template v-if="Status.modify">
       <div class="d-flex my-2" v-if="Status.loaded">
         <v-btn color="red" variant="outlined" class="ml-auto" elevation="0" 
-          @click="Status.modify = false"
+          @click="cancelUpdate"
         >
           <p class="text-subtitle-1">取消</p>
         </v-btn>
@@ -216,6 +217,7 @@
 </template>
 
 <image-amp ref="RefImageAmp"></image-amp>
+<loading ref="RefLoading"></loading>
 </template>
 
 <script setup>
@@ -224,6 +226,7 @@ import { useRoute, useRouter  } from 'vue-router';
 import Responses from '@/views/user/Responses.vue'
 import ImageAmp from '@/components/util/ImageAmp.vue';
 import TagBar from '@/components/util/TagBar.vue';
+import Loading from '@/components/util/Loading.vue';
 
 import TagsPreset from '@/plugins/tags'
 import * as FILES from '@/plugins/files'
@@ -254,6 +257,7 @@ const RefImageAmp = ref(null);
 const RefImageInput = ref(null);
 const RefFileInput = ref(null);
 const RefTagInput = ref(null);
+const RefLoading = ref(null);
 
 ///// v-model
 const BindInput = reactive({
@@ -331,20 +335,24 @@ function serverFileRemove(idx) {
 
 ///// delete current
 function remove() {
+  RefLoading.value.show();
   QUERY.post('/api/user/request/delete', {
     request_id: REQUEST_ID
   })
   .then(data => {
+    RefLoading.value.hide();
     alert('删除成功');
     BindData.status = 2;
   })
 }
 
 function repost() {
+  RefLoading.value.show();
   QUERY.post('/api/user/request/repost', {
     request_id: REQUEST_ID
   })
   .then(data => {
+    RefLoading.value.hide();
     alert('发布成功');
     init();
   })
@@ -360,7 +368,14 @@ function openModify() {
   Status.modify = true;
 }
 
+function cancelUpdate() {
+  RefLoading.value.show();
+  Status.modify = false;
+  init();
+}
+
 function uploadModify() {
+  RefLoading.value.show();
   var formData = new FormData();
   formData.append('request_id', REQUEST_ID);
   formData.append('title', BindData.biref);
@@ -389,7 +404,7 @@ function uploadModify() {
   QUERY.post('/api/user/request/modify', formData, null, false)
   .then(res => {
     alert('修改成功');
-    window.location.reload();
+    init();
   })
 }
 
@@ -429,6 +444,7 @@ function init() {
 
     init_user(BindData.poster_id);
     Status.loaded = true;
+    RefLoading.value.hide();
   })
 }
 

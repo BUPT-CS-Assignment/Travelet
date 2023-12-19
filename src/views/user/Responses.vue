@@ -15,7 +15,7 @@
         :responder_id="USER_ID"
         :request_id="REQUEST_ID" 
         :on_cancel="()=>{Status.dialog=false;}"
-        :on_success="()=>{Status.dialog=false;}"
+        :on_success="()=>{Status.dialog=false; reload();}"
       />
     </template>
   </template>
@@ -24,11 +24,13 @@
 <!-- all responses -->
 <p class="ml-2 mt-10 text-h6 font-weight-bold">所有回复 {{ BindReply.total }}</p>
 <div>
-  <template v-for="(uid, index) in BindReply.data">
+  <template v-for="(item, index) in BindReply.data">
     <v-divider class="my-3"/>
     <response-view 
       :request_id="REQUEST_ID"
-      :response_id="uid"
+      :response_id="item.id"
+      :responder_id="item.responder_id"
+      :modified="item.responder_id == USER_ID && BindData.status == 0"
       :acceptable="checkIsPoster && BindData.status == 0"
     />
   </template>
@@ -80,20 +82,26 @@ function filterResponse(data) {
   BindReply.data = [];
   // find accepted
   if(BindReply.accepted != null && BindReply.accepted != undefined) {
-    BindReply.data.push(BindReply.accepted);
+    BindReply.data.push({id: BindReply.accepted});
   }
   // find my
   data.forEach(element => {
     if(element.id != BindReply.accepted && element.responder_id == USER_ID) {
-      BindReply.data.push(element.id);
+      BindReply.data.push(element);
     }
   });
   // append others
   data.forEach(element => {
     if(element.id != BindReply.accepted && element.responder_id != USER_ID) {
-      BindReply.data.push(element.id);
+      BindReply.data.push(element);
     }
   });
+}
+
+function reload() {
+  BindReply.data = [];
+  BindReply.total = 0;
+  init();
 }
 
 function init() {

@@ -10,7 +10,12 @@
       <p class="text-subtitle-1 font-weight-bold ml-3">{{ BindData.name }}</p>
       <p class="text-caption text-grey-darken-2 ml-3"> {{ BindData.date }}</p>
     </div>
-    <!-- accepted-->
+    <!-- my -->
+    <v-chip v-if="USER_ID == props.responder_id" label color="blue" class="align-self-start ml-3">
+      <v-icon size="small">mdi-account</v-icon>
+      <p class="font-weight-bold ml-1">我的回复</p>
+    </v-chip>
+    <!-- accepted -->
     <v-chip v-if="BindData.status == 1" label color="green" class="align-self-start ml-3">
       <v-icon size="small">mdi-star</v-icon>
       <p class="font-weight-bold ml-1">已采纳</p>
@@ -66,7 +71,7 @@
           lazy-src="https://fakeimg.pl/300x300/?retina=1&text=image&font=lobster"
         >
           <div v-if="Status.update" class="d-flex">
-            <v-btn @click="serverImageRemove(index)" icon="" variant="text" color="red" size="small" class="ml-auto">
+            <v-btn @click.stop="serverImageRemove(index)" icon="" variant="text" color="red" size="small" class="ml-auto">
               <v-icon size="large">mdi-close</v-icon>
             </v-btn>
           </div>
@@ -93,18 +98,19 @@
     <v-list-item v-for="(file, index) in BindData.files" :key="index"
       :title="file.filename"
       :subtitle="FILES.formatFileSize(file.size)"
+      @click="QUERY.download(file.id)"
     >
       <template v-slot:prepend>
         <v-icon color="grey-darken-3"> {{ FILES.iconFileType(file.mime) }} </v-icon>
       </template>
-      <template v-if="props.modified" v-slot:append>
+      <template v-if="props.modified && Status.update" v-slot:append>
         <v-btn @click.stop="serverFileRemove(index)" icon="" variant="text" color="red" size="small">
           <v-icon size="large">mdi-close</v-icon>
         </v-btn>
       </template>
     </v-list-item>
     <!-- local files -->
-    <template v-if="props.modified">
+    <template v-if="props.modified && Status.update">
       <v-list-item v-for="(file, index) in BindInput.files" :key="index"
         :title="file.name"
         :subtitle="FILES.formatFileSize(file.size)"
@@ -125,25 +131,25 @@
   <template v-if="Status.update">
     <div class="d-flex">
       <v-btn color="red" variant="outlined" class="ml-auto" elevation="0" 
-        @click="cancel"
+        @click="cancel"  :disabled="Status.uploading"
       >
         <p class="text-subtitle-1">取消</p>
       </v-btn>
       
       <template v-if="props.response_id == null">
         <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0"
-          :disabled="BindInput.desc.length == 0" 
+          :disabled="BindInput.desc.length == 0 || Status.uploading" 
           @click="upload"
         >
-          <p class="text-subtitle-1">发布</p>
+          <p class="text-subtitle-1">{{ Status.uploading ? '请稍后' : '发布' }}</p>
         </v-btn>
       </template>
       <template v-else>
         <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0"
-          :disabled="BindInput.desc.length == 0" 
+          :disabled="BindInput.desc.length == 0 || Status.uploading" 
           @click="uploadModify"
         >
-          <p class="text-subtitle-1">保存</p>
+          <p class="text-subtitle-1">{{ Status.uploading ? '请稍后' : '保存' }}</p>
         </v-btn>
       </template>
       
@@ -173,6 +179,7 @@
 
 <!-- Amplify -->
 <image-amp ref="RefImageAmp"></image-amp>
+<Loading ref="RefLoading"></Loading>
 
 <template v-if="props.modified">
   <v-file-input ref="RefImageInput"
@@ -192,6 +199,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue';
 import ImageAmp from '@/components/util/ImageAmp.vue';
+import Loading from './util/Loading.vue';
 import * as FILES from '@/plugins/files'
 import * as QUERY from '@/plugins/query'
 
@@ -208,15 +216,20 @@ const props = defineProps({
   on_success: { type: Function, default: ()=>{} }
 })
 
+///// const value
+const USER_ID = Number(QUERY.get_user_id());
+
 ///// ref
 const RefImageAmp = ref(null);
 const RefImageInput = ref(null);
 const RefFileInput = ref(null);
+const RefLoading = ref(null);
 
 ///// v-model
 const Status = reactive({
   update: false,
-  loaded: false
+  loaded: false,
+  uploading: false
 })
 const BindInput = reactive({
   desc: '',
@@ -285,24 +298,28 @@ function serverFileRemove(idx) {
 ///// operations
 // action
 function accept() {
+  RefLoading.value.show();
   QUERY.post('/api/user/request/reply',{
     request_id: props.request_id,
     response_id: props.response_id,
     action: "accept"
   })
   .then(data => {
-    alert("成功接受回复")
+    RefLoading.value.hide();
+    alert("已采纳回复")
     window.location.reload();
   })
 }
 
 function reject() {
+  RefLoading.value.show();
   QUERY.post('/api/user/request/reply',{
     request_id: props.request_id,
     response_id: props.response_id,
     action: "deny"
   })
   .then(data => {
+    RefLoading.value.hide();
     alert("已拒绝回复")
     window.location.reload();
   })
@@ -322,6 +339,7 @@ function uploadModify() {
   if(props.response_id == null || props.response_id == NaN || props.response_id == undefined)
     return;
 
+  Status.uploading = true;
   var formData = new FormData();
   formData.append('response_id', props.response_id);
   formData.append('description', BindInput.desc);
@@ -342,6 +360,7 @@ function uploadModify() {
 
   QUERY.post('/api/user/response/modify', formData, null, false)
   .then(res => {
+    Status.uploading = false;
     alert('修改成功');
     window.location.reload();
   })
@@ -354,11 +373,13 @@ function cancel() {
   BindInput.images = [];
   BindInput.files = [];
   BindInput.image_data = [];
+  init();
   props.on_cancel();
 }
 
 // upload
 function upload() {
+  Status.uploading = true;
   const formData = new FormData();
   formData.append('description', BindInput.desc);
   formData.append('request_id', props.request_id);
@@ -376,6 +397,7 @@ function upload() {
   // post to server
   QUERY.post('/api/user/response/post', formData, null, false)
   .then(res => {
+    Status.uploading = false;
     alert('发布成功')
     props.on_success();
   })
@@ -443,7 +465,7 @@ function init() {
 ///// mounted
 onMounted(() => {
   init();
-  if(props.modify_at_init) modify();
+  if(props.modify_at_init) openModify();
 })
 
 </script>

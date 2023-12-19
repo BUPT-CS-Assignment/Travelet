@@ -37,6 +37,23 @@ function fileURL(uid) {
   return '/api/file/download/' + String(uid)
 }
 
+async function download(uid) {
+  try{
+    const response = await fetch('/api/file/download/' + String(uid));
+    const blob = await response.blob();
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    const contentDisposition = response.headers.get('content-disposition');
+    const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
+    const fileName = fileNameMatch ? fileNameMatch[1] : 'downloaded_file';
+    link.download = fileName;
+    link.click();
+    window.URL.revokeObjectURL(link.href);
+  }catch(err) {
+    alert(err)
+  }
+}
+
 function get(url, param = {}, identifier = null) {
   if(param == null) param = {}
 
@@ -95,4 +112,4 @@ function post(url, data, identifier = null, json = true, headers = {}) {
   })
 }
 
-export {get, post, fileURL, set_user_id, get_user_id, set_user_name, get_user_name, get_user_city, set_user_city, clear, assert}
+export {get, post, fileURL, download, set_user_id, get_user_id, set_user_name, get_user_name, get_user_city, set_user_city, clear, assert}

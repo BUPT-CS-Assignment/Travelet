@@ -61,7 +61,7 @@
 > 
   <new-request
     :onCancel="()=>{Dialog=false;}"
-    :onComplete="()=>{Dialog=false; refresh();}"
+    :onComplete="()=>{Dialog=false; newQuery();}"
   ></new-request>
 </v-dialog>
 <Loading ref="RefLoading"></Loading>
