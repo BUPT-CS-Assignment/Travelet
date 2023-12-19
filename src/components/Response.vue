@@ -1,16 +1,22 @@
 <template>
 <div class="pa-2" style="width: 100%;">
   <!-- header -->
-  <div class="d-flex align-center">
+  <div class="d-flex">
     <!-- from -->
-    <v-avatar size="40" rounded="lg" color="grey">
+    <v-avatar size="40" rounded="lg" color="grey" class="align-self-center">
       {{ BindData.name.length > 0 ? BindData.name[0] : '' }}
     </v-avatar>
     <div class="d-flex flex-column justify-start align-start">
       <p class="text-subtitle-1 font-weight-bold ml-3">{{ BindData.name }}</p>
       <p class="text-caption text-grey-darken-2 ml-3"> {{ BindData.date }}</p>
     </div>
-    
+    <!-- accepted-->
+    <v-chip v-if="BindData.status == 1" label color="green" class="align-self-start ml-3">
+      <v-icon size="small">mdi-star</v-icon>
+      <p class="font-weight-bold ml-1">已采纳</p>
+    </v-chip>
+
+
     <!-- buttons -->
     <template v-if="props.modified">
       <div class="ml-auto d-flex align-self-end">
@@ -18,7 +24,7 @@
           <v-icon color="red" size="24" class="mr-4" @click="remove">
             mdi-trash-can-outline
           </v-icon>
-          <v-icon size="24" class="mr-2" @click="modify">
+          <v-icon size="24" class="mr-2" @click="openModify">
             mdi-pencil-outline
           </v-icon>
         </template>
@@ -37,7 +43,7 @@
   <!-- detail -->
   <div class="mt-2">
     <template v-if="!Status.update">
-      <p style="word-break: break-all;"> {{BindData.desc}} </p>
+      <p  v-html="DescFormatted" style="word-break: break-all;"></p>
     </template>
     <template v-else>
       <v-textarea 
@@ -56,11 +62,11 @@
       <v-col v-for="(item, index) in BindData.images" cols="auto">
         <v-img @click="RefImageAmp.url(item.id)"
           :src="QUERY.fileURL(item.id)" 
-          aspect-ratio="1" min-width="160" cover 
+          aspect-ratio="1" width="160" cover 
           lazy-src="https://fakeimg.pl/300x300/?retina=1&text=image&font=lobster"
         >
-          <div v-if="props.modified" class="d-flex">
-            <v-btn @click="" icon="" variant="text" color="red" size="small" class="ml-auto">
+          <div v-if="Status.update" class="d-flex">
+            <v-btn @click="serverImageRemove(index)" icon="" variant="text" color="red" size="small" class="ml-auto">
               <v-icon size="large">mdi-close</v-icon>
             </v-btn>
           </div>
@@ -71,10 +77,10 @@
         <v-col v-for="(item, index) in BindInput.images" cols="auto">
           <v-img @click="RefImageAmp.raw(BindInput.image_data[index])"
             :src="BindInput.image_data[index]" 
-            aspect-ratio="1" cover min-width="200"
+            aspect-ratio="1" cover width="160"
           >
-            <div class="d-flex">
-              <v-btn @click="handleImageRemove(index)" icon="" variant="text" color="red" size="small" class="ml-auto">
+            <div v-if="Status.update" class="d-flex">
+              <v-btn @click.stop="handleImageRemove(index)" icon="" variant="text" color="red" size="small" class="ml-auto">
                 <v-icon size="large">mdi-close</v-icon>
               </v-btn>
             </div>
@@ -85,14 +91,14 @@
 
     <!-- server files -->
     <v-list-item v-for="(file, index) in BindData.files" :key="index"
-      :title="file.name"
+      :title="file.filename"
       :subtitle="FILES.formatFileSize(file.size)"
     >
       <template v-slot:prepend>
-        <v-icon color="grey-darken-3"> {{ FILES.iconFileType(file.type) }} </v-icon>
+        <v-icon color="grey-darken-3"> {{ FILES.iconFileType(file.mime) }} </v-icon>
       </template>
       <template v-if="props.modified" v-slot:append>
-        <v-btn @click="" icon="" variant="text" color="red" size="small">
+        <v-btn @click.stop="serverFileRemove(index)" icon="" variant="text" color="red" size="small">
           <v-icon size="large">mdi-close</v-icon>
         </v-btn>
       </template>
@@ -107,7 +113,7 @@
           <v-icon color="grey-darken-3"> {{ FILES.iconFileType(file.type) }} </v-icon>
         </template>
         <template v-slot:append>
-          <v-btn @click="handleFileRemove(index)" icon="" variant="text" color="red" size="small">
+          <v-btn @click.stop="handleFileRemove(index)" icon="" variant="text" color="red" size="small">
             <v-icon size="large">mdi-close</v-icon>
           </v-btn>
         </template>
@@ -124,24 +130,43 @@
         <p class="text-subtitle-1">取消</p>
       </v-btn>
       
-      <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0"
-        :disabled="BindInput.desc.length == 0" 
-        @click="upload"
-      >
-        <p class="text-subtitle-1">发布</p>
-      </v-btn>
+      <template v-if="props.response_id == null">
+        <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0"
+          :disabled="BindInput.desc.length == 0" 
+          @click="upload"
+        >
+          <p class="text-subtitle-1">发布</p>
+        </v-btn>
+      </template>
+      <template v-else>
+        <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0"
+          :disabled="BindInput.desc.length == 0" 
+          @click="uploadModify"
+        >
+          <p class="text-subtitle-1">保存</p>
+        </v-btn>
+      </template>
+      
     </div>
   </template>
   
   <!-- accept -->
   <template v-if="props.acceptable && Status.loaded">
     <div class="d-flex justify-end mt-2">
-      <v-btn color="red" variant="outlined" class="ml-auto" elevation="0">
-        <p class="text-subtitle-1">拒绝</p>
-      </v-btn>
-      <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0">
-        <p class="text-subtitle-1">接受</p>
-      </v-btn>
+      <template v-if="BindData.status == 0">
+        <v-btn @click="reject" color="red" variant="outlined" class="ml-auto" elevation="0">
+          <p class="text-subtitle-1">拒绝</p>
+        </v-btn>
+        <v-btn @click="accept" color="blue-accent-3" class="align-self-start ml-2" elevation="0">
+          <p class="text-subtitle-1">采纳</p>
+        </v-btn>
+      </template>
+      <template v-else-if="BindData.status == 2">
+        <v-btn color="red" variant="outlined" class="ml-auto" elevation="0" disabled>
+          <p class="text-subtitle-1">已拒绝</p>
+        </v-btn>
+      </template>
+
     </div>
   </template>
 </div>
@@ -165,7 +190,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import ImageAmp from '@/components/util/ImageAmp.vue';
 import * as FILES from '@/plugins/files'
 import * as QUERY from '@/plugins/query'
@@ -197,7 +222,8 @@ const BindInput = reactive({
   desc: '',
   images: [],
   files: [],
-  image_data: []
+  image_data: [],
+  deleted: []
 })
 const BindData = reactive({
   uid: NaN,
@@ -205,7 +231,13 @@ const BindData = reactive({
   date: '',
   desc: '',
   images: [],
-  files: []
+  files: [],
+  status: 0
+})
+
+///// text
+const DescFormatted = computed(() => {
+  return String(BindData.desc).replace(/\n/g, '<br/>');
 })
 
 ///// images
@@ -227,6 +259,11 @@ function handleImageRemove(idx) {
   BindInput.image_data.splice(idx, 1);
 }
 
+function serverImageRemove(idx) {
+  BindInput.deleted.push(BindData.images[idx].id);
+  BindData.images.splice(idx, 1);
+}
+
 
 ///// files
 function handleFileInput(event) {
@@ -239,17 +276,84 @@ function handleFileRemove(idx) {
   BindInput.files.splice(idx, 1);
 }
 
+function serverFileRemove(idx) {
+  BindInput.deleted.push(BindData.files[idx].id);
+  BindData.files.splice(idx, 1);
+}
+
 
 ///// operations
+// action
+function accept() {
+  QUERY.post('/api/user/request/reply',{
+    request_id: props.request_id,
+    response_id: props.response_id,
+    action: "accept"
+  })
+  .then(data => {
+    alert("成功接受回复")
+    window.location.reload();
+  })
+}
+
+function reject() {
+  QUERY.post('/api/user/request/reply',{
+    request_id: props.request_id,
+    response_id: props.response_id,
+    action: "deny"
+  })
+  .then(data => {
+    alert("已拒绝回复")
+    window.location.reload();
+  })
+}
+
 // modify
-function modify() {
+function openModify() {
+  BindInput.desc = BindData.desc;
+  BindInput.images = []
+  BindInput.files = []
+  BindInput.image_data = []
+  BindInput.deleted = []
   Status.update = true;
+}
+
+function uploadModify() {
+  if(props.response_id == null || props.response_id == NaN || props.response_id == undefined)
+    return;
+
+  var formData = new FormData();
+  formData.append('response_id', props.response_id);
+  formData.append('description', BindInput.desc);
+  // images
+  for (let i = 0; i < BindInput.images.length; i++) {
+    const file = BindInput.images[i];
+    formData.append('image_files', file);
+  }
+  // files
+  for (let i = 0; i < BindInput.files.length; i++) {
+    const file = BindInput.files[i];
+    formData.append('raw_files', file);
+  }
+  // deleted
+  BindInput.deleted.forEach(id => {
+    formData.append('files_deleted', id);
+  })
+
+  QUERY.post('/api/user/response/modify', formData, null, false)
+  .then(res => {
+    alert('修改成功');
+    window.location.reload();
+  })
 }
 
 // cancel
 function cancel() {
   Status.update = false;
   BindInput.desc = BindData.desc;
+  BindInput.images = [];
+  BindInput.files = [];
+  BindInput.image_data = [];
   props.on_cancel();
 }
 
@@ -291,7 +395,7 @@ function remove() {
 // on init
 function init_user(user_id) {
   if(user_id === QUERY.get_user_id()) {
-    BindData.name = QUERY.get_username();
+    BindData.name = QUERY.get_user_name();
     return;
   }
 
@@ -327,6 +431,7 @@ function init() {
     BindData.desc = info.description;
     BindData.images = info.image_files;
     BindData.files = info.raw_files;
+    BindData.status = info.status;
     // copy to input
     BindInput.desc = BindData.desc;
 
@@ -341,9 +446,4 @@ onMounted(() => {
   if(props.modify_at_init) modify();
 })
 
-
-///// expose
-defineExpose({
-
-})
 </script>

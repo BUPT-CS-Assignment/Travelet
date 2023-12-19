@@ -1,18 +1,11 @@
 <template>
 <!-- personal response -->
-<template v-if="!checkIsPoster">
-  <v-divider class="my-4"/>
-  <template v-if="BindReply.personal">
-    <p class="ml-2 text-h6 font-weight-bold">我的响应</p>
-    <response-view 
-      :response_id="BindReply.personal" 
-      :modified="BindData.status == 0"
-    />
-  </template>
-  <template v-else>
+<template v-if="!checkIsPoster && Status.loaded && BindData.status == 0">
+  <v-spacer class="my-4"/>
+  <template v-if="Status.loaded">
     <template v-if="!Status.dialog">
       <v-btn class="mb-4" elevation="0" color="blue-accent-2" @click="Status.dialog = true">
-        去响应
+        回复
       </v-btn>
     </template>
     <template v-else>
@@ -29,13 +22,14 @@
 </template>
 
 <!-- all responses -->
+<p class="ml-2 mt-10 text-h6 font-weight-bold">所有回复 {{ BindReply.total }}</p>
 <div>
-  <p class="ml-2 mt-10 text-h6 font-weight-bold">所有响应</p>
-  <template v-for="(uid, index) in BindReply.rest">
+  <template v-for="(uid, index) in BindReply.data">
     <v-divider class="my-3"/>
     <response-view 
+      :request_id="REQUEST_ID"
       :response_id="uid"
-      :acceptable="checkIsPoster"
+      :acceptable="checkIsPoster && BindData.status == 0"
     />
   </template>
 </div>
@@ -66,14 +60,14 @@ const RefImageAmp = ref(null);
 
 ///// v-model
 const BindData = reactive({
+  loaded: false,
   poster_id: NaN,
   status: 4,
 })
 
 const BindReply = reactive({
-  personal: NaN,
-  accepted: NaN,
-  rest: []
+  data: [],
+  total: 0
 })
 
 ///// rules
@@ -82,13 +76,22 @@ const checkIsPoster = computed(() => {
 })
 
 function filterResponse(data) {
-  BindReply.personal = NaN;
-  BindReply.rest = []
+  BindReply.total = data.length;
+  BindReply.data = [];
+  // find accepted
+  if(BindReply.accepted != null && BindReply.accepted != undefined) {
+    BindReply.data.push(BindReply.accepted);
+  }
+  // find my
   data.forEach(element => {
-    if(element.responder_id == USER_ID) {
-      BindReply.personal = element.id;
-    } else if(element.id != BindReply.accepted) {
-      BindReply.rest.push(element.id);
+    if(element.id != BindReply.accepted && element.responder_id == USER_ID) {
+      BindReply.data.push(element.id);
+    }
+  });
+  // append others
+  data.forEach(element => {
+    if(element.id != BindReply.accepted && element.responder_id != USER_ID) {
+      BindReply.data.push(element.id);
     }
   });
 }
@@ -104,6 +107,7 @@ function init() {
     BindData.status = info.status;
     BindReply.accepted = info.accepted_response_id;
     filterResponse(info.pending_responses);
+    Status.loaded = true;
   })
 }
 

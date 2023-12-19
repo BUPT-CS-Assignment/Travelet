@@ -80,7 +80,7 @@
 
         <v-row class="mt-4">
           <v-col v-for="(item, index) in Input.images" cols="auto">
-            <v-img :src="Input.image_data[index]" aspect-ratio="1" cover min-width="200">
+            <v-img :src="Input.image_data[index]" aspect-ratio="1" cover width="200">
               <div class="d-flex">
                 <v-btn icon="" variant="text" color="red" size="small" class="ml-auto"
                   @click="FILES.handleFileRemove(index, Input.images, removeImage)"
@@ -258,12 +258,8 @@ function upload() {
   // post
   QUERY.post('/api/user/request/post', formData, null, false)
   .then(res => {
-    if(res.status == 0) {
-      alert('发布成功');
-      props.onComplete();
-    } else {
-      alert(res.message)
-    }
+    alert('发布成功');
+    props.onComplete();
   })
 }
 

@@ -58,42 +58,35 @@ const City = ref('')
 
 const Posts = reactive({})
 
-function search(page=1) {
-  QUERY.get('/api/user/request/query_brief', {
-    city: City.value,
-    page: page
-  })
-  .then(data => {
-    console.log(data)
-    data.data.forEach(element => {
-      Posts[element.id] = element
-    });
-  })
-}
-
-
-onMounted(() => {
-  QUERY.get('/api/user/info', {}, 'user_id')
-  .then(data => {
-    City.value = data.data.register_city;
-    search();
-  })
-})
-
-function doSearch(tags){
+function doSearch(tags = null){
   Object.keys(Posts).forEach(key => {
     delete Posts[key];
   })
-  QUERY.get('/api/user/request/query_brief', {
+  let params = {
     page : CurPage.value,
     city: City.value,
-    str : tags.join(' '),
-  }, 'poster_id')
+    is_responder: 1,
+  }
+  if(tags != null) {
+    params.str = tags.join(' ');
+  }
+  QUERY.get('/api/user/request/query_brief', params, 'poster_id')
   .then(data => {
+    console.log(data)
+    PageLen.value = data.total_pages;
     data.data.forEach(element => {
       Posts[element.id] = element
     });
   }) 
 }
+
+onMounted(() => {
+  QUERY.get('/api/user/info', {}, 'user_id')
+  .then(data => {
+    City.value = data.data.register_city;
+    doSearch();
+  })
+})
+
 
 </script>

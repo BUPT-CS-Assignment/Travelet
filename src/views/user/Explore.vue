@@ -104,6 +104,7 @@ function refresh() {
   }, 'poster_id')
   .then(data => {
     console.log(data)
+    PageLen.value = data.total_pages;
     data.data.forEach(element => {
       Posts[element.id] = element
     });

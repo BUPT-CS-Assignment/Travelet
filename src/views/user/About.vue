@@ -237,8 +237,11 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import * as QUERY from '@/plugins/query'
 import {assert} from '@/plugins/query'
+
+const Router = useRouter();
 
 const UserData = reactive({
   name: QUERY.get_user_name(),
