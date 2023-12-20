@@ -120,8 +120,10 @@ function login() {
     if(Input.usr == 'admin')
       Router.push('/admin');
     else {
-      Events.info('登录成功')
-      Router.push('/home');
+      Events.info('登录成功,正在跳转')
+      setTimeout(()=>{
+        Router.push('/home');
+      },1000);
     }
   })
 }

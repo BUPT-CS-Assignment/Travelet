@@ -200,14 +200,16 @@
       <template v-if="!Update">
         <v-icon size="22" color="grey-darken-1">mdi-card-account-details</v-icon>
         <p class="ml-2"></p>
-        <p> {{ UserData.intro }} </p>
+        <p style="word-break: break-all;"> {{ UserData.intro }} </p>
       </template>
       <template v-else>
         <v-textarea
+          counter
           prepend-inner-icon="mdi-card-account-details"
           v-model="Input.intro"
           variant="outlined"
           auto-grow
+          :rules="[rules.max]"
         />
       </template>
     </div>
@@ -309,6 +311,7 @@ const rules = {
   required: (value) => !!value || '不能为空',
   min: (v) => v.length >= 6 || '长度至少为6位数',
   lim: (v) => v.length == 11 || '长度为11位数',
+  max: (v) => v.length <= 200 || '不能超过200个字符',
   number: (v) => (/\d.*\d/.test(v)) || '至少需要两个数字',
   alpha: (v) => (/[a-z]/.test(v) && /[A-Z]/.test(v)) || '不能均为小写或大写',
   match: () => Input.pwd === Input.pwd2 || '两次密码不一致'
@@ -322,6 +325,7 @@ function resetUpdate() {
 
 const input_assert2 = computed(() => {
   return rules.lim(Input.phone) === true &&
+         rules.max(Input.intro) === true &&
          (Input.phone !== UserData.phone ||
          Input.intro !== UserData.intro);
 })
@@ -401,7 +405,7 @@ function fetchLatest() {
   QUERY.get('/api/user/request/query_lasted', {}, 'poster_id')
   .then(data => {
     console.log(data)
-    if(data.data.length == 0) {
+    if(!data.data || data.data.length == 0) {
       Latest.flag = false;
       return;
     }
