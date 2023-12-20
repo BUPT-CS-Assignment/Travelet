@@ -30,6 +30,7 @@
       :request_id="REQUEST_ID"
       :response_id="item.id"
       :responder_id="item.responder_id"
+      :name="item.responder"
       :modified="item.responder_id == USER_ID && BindData.status == 0"
       :acceptable="checkIsPoster && BindData.status == 0"
       :on_delete="()=>{reload();}"

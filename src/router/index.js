@@ -30,7 +30,15 @@ const routes = [
     children: [
       {
         path: '',
+        redirect: '/admin/bill'
+      },
+      {
+        path: 'bill',
         component: () => import('@/views/admin/Bill.vue')
+      },
+      {
+        path: 'user',
+        component: () => import('@/views/admin/User.vue')
       },
       {
         path: 'request',
@@ -39,7 +47,7 @@ const routes = [
       {
         path: 'response',
         component: () => import('@/views/admin/Response.vue')
-      }
+      },
     ]
   },
   {
@@ -49,6 +57,10 @@ const routes = [
   {
     path: '/register',
     component: () => import('@/views/Register.vue')
+  },
+  {
+    path: '/admin/:catchAll(.*)',
+    redirect: '/admin/bill'
   },
   {
     path: '/:catchAll(.*)', redirect: '/home'

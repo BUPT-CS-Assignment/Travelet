@@ -3,9 +3,9 @@
 
   <!-- title -->
   <div class="align-self-center d-flex justify-center"
-    style="position: relative; width: 200px;"
+    style="position: relative; width: 210px;"
   >
-    <v-btn style="position: absolute; right: 10px; bottom: 2px;"
+    <v-btn style="position: absolute; right: 10px; bottom: 3px;"
       color="blue-accent-3" elevation="0"
       size="small" density="comfortable"
       icon="mdi-plus"
@@ -13,13 +13,13 @@
     />
 
     <p class=" text-h5 font-weight-black align-self-center">
-      探索世界
+      海内存知己
     </p>
     
   </div>
   
   <p class="align-self-center text-body-2 text-grey-darken-2 mt-3">
-    已发布 <strong>{{ TotalLen }}</strong> 条请求
+    已发布 <strong>{{ TotalNum }}</strong> 条请求
   </p>
   
   
@@ -37,8 +37,8 @@
 
   <!-- post content -->
   <div class="my-2">
-    <v-row>
-      <v-col v-for="(value, key) in Posts" class="ma-2">
+    <v-row justify="space-around">
+      <v-col v-for="(value, key) in Posts" class="ma-2" cols="auto">
         <poster :id="Number(value.id)" :data="value" :tag-action="newQuery"/>
       </v-col>
     </v-row>
@@ -78,7 +78,6 @@ import Loading from '@/components/util/Loading.vue';
 import TagsPreset from '@/plugins/tags'
 import * as QUERY from '@/plugins/query'
 import * as Events from '@/plugins/event'
-import { dateEquals } from 'element-plus';
 
 ///// router
 const Route = useRoute();
@@ -88,7 +87,7 @@ const Router = useRouter();
 const RefLoading = ref(null);
 const RefTagsInput = ref(null);
 const PageLen = ref(1);
-const TotalLen = ref(0);
+const TotalNum = ref(0);
 
 ///// v-model
 const PageVal = ref(1);
@@ -131,7 +130,7 @@ function fetchData(){
   if(Tags && Tags.length > 0) {
     params.str = Tags.join(' ');
   }
-  console.log(params);
+  // console.log(params);
 
   QUERY.get('/api/user/request/query_brief', params, 'poster_id')
   .then(data => {
@@ -145,7 +144,7 @@ function fetchData(){
     if(RefLoading.value) RefLoading.value.hide();
 
     PageLen.value = data.total_pages;
-    TotalLen.value = data.total_num;
+    TotalNum.value = data.total_num;
     Events.info('找到 ' + data.total_num + ' 条数据')
 
     data.data.sort((a, b) => {

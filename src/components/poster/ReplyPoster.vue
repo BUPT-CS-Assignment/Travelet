@@ -3,7 +3,7 @@
   <template v-slot:default="{ isHovering, props }">
     <v-card 
       rounded="lg" variant="flat" class="pa-3"
-      min-width=300 max-width=600 
+      min-width=330 max-width=600 
       v-bind="props"
       :elevation="isHovering ? 10 : 1"
       @click="checkDetail"
@@ -26,7 +26,8 @@
 
       <!-- reply content -->
       <p class="ml-3 mt-2 mr-3"> 
-        <strong class="text-subtitle-1 font-weight-bold mr-2">于 {{ Data.create_time }} 回复 :</strong>
+        <strong class="text-subtitle-1 font-weight-bold mr-2">
+          {{ Data.responder}} 于 {{ Data.modify_time }} 回复 :</strong>
         {{ Data.description }} 
       </p>
 
@@ -35,7 +36,7 @@
           <v-icon class="mt-1" size="33" color="grey-darken-2">mdi-format-quote-open</v-icon>
           <div style="width:100%">
             <p class="ml-2 mt-2 text-grey-darken-1 mr-2"> 
-              <strong class="text-subtitle-1 font-weight-bold mr-2"> 于 {{ Data.post_time }} 发布 : </strong>
+              <strong class="text-subtitle-1 font-weight-bold mr-2"> {{ Data.poster }} 于 {{ Data.post_time }} 发布 : </strong>
               {{ Data.biref }}
             </p>
             <!-- image -->
@@ -70,6 +71,10 @@ const props = defineProps({
   data: {
     type: Object,
     required: true
+  },
+  show_name: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -86,8 +91,10 @@ const StatusString = [
 
 const Data = reactive({
   request_id: props.data.request_id,
+  poster: props.data.poster,
+  responder: '',
   description: props.data.description,
-  create_time: props.data.create_time,
+  modify_time: props.data.modify_time,
   status: props.data.status,
   biref: '',
   img: null,
@@ -114,12 +121,15 @@ function queryBrief() {
     console.log(data)
     Data.biref = data.data.description;
     Data.img = randomImage(data.data.image_files);
-    Data.post_time = data.data.create_time;
+    Data.post_time = data.data.modify_time;
     Data.post_status = Number(data.data.status)
   })
 }
 
 onMounted(()=>{
+  if(props.show_name) {
+    Data.responder = props.data.responder;
+  }
   queryBrief();
 })
 

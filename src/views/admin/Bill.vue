@@ -62,7 +62,7 @@ import { useRouter } from 'vue-router';
 import * as echarts from 'echarts'
 import * as QUERY from '@/plugins/query'
 import CITIES from '@/plugins/cities'
-import {assert} from '@/plugins/query'
+import {assert_admin} from '@/plugins/query'
 
 const fetchandProcessBillData = async (currentTag, currentLocation, startTime, endTime) => {
   // Fetch bill data
@@ -136,10 +136,6 @@ export default {
 
     // On mounted lifecycle hook
     onMounted(async () => {
-      if(!assert()) {
-        Router.push('/login');
-        return;
-      }
       // Fetch tag options
       const tagData = await QUERY.post('/api/common/query/tags');
       tagOptions.value = tagData.data;

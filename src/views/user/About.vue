@@ -3,9 +3,7 @@
 <div class="d-flex flex-row flex-wrap">
 
   <!-- latest reponse -->
-  <div class="flex-grow-1 mx-3 pr-10 my-6"
-    style="min-width: 500px;"
-  >
+  <div class="flex-grow-1 mx-3 pr-10 my-6" style="min-width: 500px;">
     <v-hover>
       <template v-slot:default="{ isHovering, props }">
         <v-card 
@@ -51,19 +49,22 @@
           <v-divider></v-divider>
           <v-card-text class="d-flex flex-row">
             <template v-if="Latest.flag">
-              <v-row justify="center">
-                <v-col class="d-flex flex-column">
-                  <p class="align-self-center">
+              <v-row class="mx-4 text-grey text-subtitle-2 font-weight-bold" justify="space-around">
+                <v-col class="d-flex align-end">
+                  <v-icon size="25">mdi-alarm</v-icon>
+                  <p class="ml-1">
                     {{ Latest.date }}
                   </p>
                 </v-col>
-                <v-col class="d-flex flex-column">
-                  <p class="align-self-center">
+                <v-col class="d-flex align-end">
+                  <v-icon size="23">mdi-map-marker-outline</v-icon>
+                  <p class="ml-1">
                     {{ Latest.city }}
                   </p>
                 </v-col>
-                <v-col class="d-flex flex-column">
-                  <span class="align-self-center d-inline-block text-truncate">
+                <v-col class="d-flex align-end">
+                  <v-icon size="23">mdi-text-box-outline</v-icon>
+                  <span class="ml-1 d-inline-block text-truncate">
                     {{ Latest.brief }}  
                   </span>
                 </v-col>
@@ -160,7 +161,7 @@
     
     <!-- uid and location -->
     <p class="mt-2 text-overline font-weight-regular text-blue-accent-3">
-      <strong class="font-weight-bold">UID:</strong>
+      <strong class="font-weight-bold ml-1">UID:</strong>
       {{ UserData.id }} 
     </p>
 
@@ -249,7 +250,7 @@
 
 <!-- title -->
 <p class="text-h5 font-weight-black align-self-center ml-3">
-  全部回复 {{ TotalNum }}
+  我的回复 {{ TotalNum }}
 </p>
 
 <!-- post content -->

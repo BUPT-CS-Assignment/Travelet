@@ -36,6 +36,14 @@ function assert() {
   return flag;
 }
 
+function assert_admin() {
+  if(get_user_name() != 'admin'){
+    Events.err('权限不足')
+    return false;
+  }
+  return true;
+}
+
 function fileURL(uid) {
   return '/api/file/download/' + String(uid)
 }
@@ -111,4 +119,4 @@ function post(url, data, identifier = null, json = true, headers = {}) {
   })
 }
 
-export {get, post, fileURL, download, set_user_id, get_user_id, set_user_name, get_user_name, get_user_city, set_user_city, clear, assert}
+export {get, post, fileURL, download, set_user_id, get_user_id, set_user_name, get_user_name, get_user_city, set_user_city, clear, assert, assert_admin}

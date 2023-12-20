@@ -3,43 +3,37 @@
   <template v-slot:default="{ isHovering, props }">
     <v-card 
       rounded="lg" variant="flat" 
-      min-width=400 max-width=800 
+      min-width=400 
       v-bind="props"
       :elevation="isHovering ? 6 : 1"
       @click="checkDetail"
     >
       <v-img :src="Data.img"
         lazy-src="https://fakeimg.pl/400x300/?retina=1&text=image&font=lobster"
-        aspect-ratio="4/3"
+        height="330" cover
       />
       
       <!-- content -->
-      <div class="ma-6">
+      <div>
         <!-- indicator -->
-        <div class="my-2" :class="isHovering ? 'mr-8' : 'mr-6'"
+        <div class="my-4" :class="isHovering ? 'mr-12' : 'mr-10'"
           style="position: absolute;right: 0px;"
         >
           <v-avatar v-for="i in 3"
-            size="5" style="margin-left: 3px;"
+            size="6" style="margin-left: 4px;"
             :color="isHovering ? 'blue-accent-3':'grey-lighten-2'"
           />
         </div>
         
         <!-- titel -->
-        <p class="text-h5" style="margin-right: 20px;">
+        <p class="text-h5 mt-6 ml-6 d-inline-block text-truncate" style="margin-right: 20px;">
           {{ Data.biref }}
         </p>
 
-        <v-spacer class="my-1"></v-spacer>
+        <v-spacer class="my-2"></v-spacer>
 
-        <!-- date -->
-        <p class="text-blue-accent-2 text-body-2 mt-4 mb-2">
-          {{ Data.date }}
-        </p>
 
-        <v-spacer class="my-1"></v-spacer>
-
-        <div class="d-flex">
+        <div class="d-flex ml-6">
           <v-chip size="small" v-for="(tag, index) in Data.tags"
             class="mr-1" color="grey" style="z-index:9"
             @click.stop="tagClick(tag)"
@@ -47,6 +41,31 @@
             <strong class="text-blue-accent-3">#</strong>
             <p class="text-black">{{ tag }}</p>
           </v-chip>
+        </div>
+
+        <v-divider class="mt-4" />
+
+        <div class="d-flex flex-row px-6 py-3">
+          <v-row class="text-grey text-subtitle-2 font-weight-medium"  justify="space-around">
+            <v-col class="d-flex align-end" cols="auto">
+              <v-icon size="25">mdi-account-outline</v-icon>
+              <p class="ml-1">
+              {{ Data.poster }}
+            </p>
+            </v-col>
+            <v-col class="d-flex align-end" cols="auto">
+              <v-icon size="23">mdi-card-text-outline</v-icon>
+              <p class="ml-2 font-weight-bold">
+                {{ Data.reply }}
+              </p>
+            </v-col>
+            <v-col class="d-flex align-end" cols="auto">
+              <v-icon size="23">mdi-alarm</v-icon>
+              <p class="ml-2">
+                {{ Data.date }}
+              </p>
+            </v-col>
+          </v-row>
         </div>
       </div>
     </v-card>
@@ -93,9 +112,11 @@ function getRandomInt(max) {
 
 const Data = reactive({
   tags: props.data.tags,
+  poster: props.data.poster,
   date: props.data.modify_time,
   biref: props.data.description,
   status: props.data.status,
+  reply: props.data.reply,
   img: randomImage(),
 })
 

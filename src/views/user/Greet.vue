@@ -2,11 +2,12 @@
 <div class="d-flex flex-column">
   <!-- title -->
   <p class=" text-h5 font-weight-black align-self-center">
-    {{ UserCity }}
+    天涯若比邻
   </p>
 
   <p class="align-self-center text-body-2 text-grey-darken-2 mt-3">
-    共 <strong>{{ TotalLen }} </strong> 条请求
+    <strong>{{ UserCity }}</strong> -
+    共 <strong>{{ TotalNum }} </strong> 条请求
   </p>
 
     <!-- search bar -->
@@ -63,7 +64,7 @@ const Router = useRouter();
 ///// const values
 const UserCity = ref('');
 const PageLen = ref(1);
-const TotalLen = ref(0);
+const TotalNum = ref(0);
 
 ///// ref
 const RefTagsInput = ref(null);
@@ -116,7 +117,7 @@ function fetchData(){
     if(RefLoading.value) RefLoading.value.hide();
 
     PageLen.value = data.total_pages;
-    TotalLen.value = data.total_num;
+    TotalNum.value = data.total_num;
     Events.info('找到 ' + data.total_num + ' 条数据')
 
     data.data.sort((a, b) => {

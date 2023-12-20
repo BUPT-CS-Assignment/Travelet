@@ -11,8 +11,8 @@
     
   </div>
   
-  <p class="align-self-center text-caption text-grey-darken-2 mt-2">
-    第 {{ PageVal }} 页 / 共 {{ PageLen }} 页
+  <p class="align-self-center text-body-2 text-grey-darken-2 mt-3">
+    共 <strong>{{ TotalNum }} </strong> 条请求
   </p>
   
   
@@ -30,9 +30,9 @@
 
   <!-- post content -->
   <div class="my-2">
-    <v-row>
-      <v-col v-for="(value, key) in Posts" class="ma-2">
-        <poster :id="Number(key)" :data="value" :tag-action="newQuery"/>
+    <v-row justify="space-around">
+      <v-col v-for="(value, key) in Posts" class="ma-2" cols="auto">
+        <poster :id="Number(key)" :data="value" name :tag-action="newQuery"/>
       </v-col>
     </v-row>
   </div>
@@ -49,7 +49,7 @@
 </template>
 
 <script setup>
-import {ref, reactive, onMounted, watch, toRaw} from 'vue';
+import {ref, reactive, onMounted} from 'vue';
 import { useRoute, useRouter  } from 'vue-router';
 import TagBar from '@/components/util/TagBar.vue'
 import Poster from '@/components/poster/ExplorePoster.vue';
@@ -66,11 +66,12 @@ const Router = useRouter();
 ///// ref
 const RefLoading = ref(null);
 const RefTagsInput = ref(null);
-const PageLen = ref(undefined);
+const PageLen = ref(1);
+const TotalNum = ref(0);
 
 ///// v-model
 const PageVal = ref(1);
-const Posts = reactive({})
+const Posts = reactive([])
 var Tags = [];
 
 ///// query 
@@ -118,19 +119,19 @@ function fetchData(){
       return newQuery(Tags);
     }
 
-    Object.keys(Posts).forEach(key => {
-      delete Posts[key];
-    })
+    Posts.splice(0);
     if(RefLoading.value) RefLoading.value.hide();
 
     PageLen.value = data.total_pages;
-    Events.info('找到 ' + data.total_pages + ' 页数据')
+    TotalNum.value = data.total_num;
+    Events.info('找到 ' + data.total_num + ' 条数据')
 
-    setTimeout(()=>{
-      data.data.forEach(element => {
-        Posts[element.id] = element
-      });
-    }, 100);
+    data.data.sort((a, b) => {
+      if(a.status == b.status) return new Date(b.modify_time) - new Date(a.modify_time);
+      else return a.status - b.status;
+    }).forEach(element => {
+      Posts.push(element);
+    });
   })
 }
 

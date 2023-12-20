@@ -4,10 +4,10 @@
   <div class="d-flex">
     <!-- from -->
     <v-avatar size="40" rounded="lg" color="grey" class="align-self-center">
-      {{ BindData.name.length > 0 ? BindData.name[0] : '' }}
+      {{ props.name.length > 0 ? props.name[0] : '' }}
     </v-avatar>
     <div class="d-flex flex-column justify-start align-start">
-      <p class="text-subtitle-1 font-weight-bold ml-3">{{ BindData.name }}</p>
+      <p class="text-subtitle-1 font-weight-bold ml-3">{{ props.name }}</p>
       <p class="text-caption text-grey-darken-2 ml-3"> {{ BindData.date }}</p>
     </div>
     <!-- my -->
@@ -209,6 +209,7 @@ import * as Events from '@/plugins/event'
 ///// props
 const props = defineProps({
   responder_id: {type: Number, default: null},
+  name: {type: String, default: ''},
   response_id: { type:Number, default: null},
   request_id: { type:Number, default: null },
   modified: { type: Boolean, default: false },
@@ -433,27 +434,9 @@ function remove() {
   })
 }
 
-// on init
-function init_user(user_id) {
-  RESPONDER.value = Number(user_id);
-  if(user_id === QUERY.get_user_id()) {
-    BindData.name = QUERY.get_user_name();
-    return;
-  }
-
-  QUERY.get('/api/user/info', {
-    'user_id' : user_id
-  })
-  .then(data => {
-    const basic = data.data;
-    BindData.name = basic.username;
-  })
-}
-
 // init infomation
 function init() {
   Status.update = false;
-  if(props.responder_id != null) init_user(props.responder_id);
 
   if(props.response_id == null || props.response_id == NaN || props.response_id == undefined)
     return;
@@ -468,7 +451,6 @@ function init() {
     if(!props.responder_id) {
       RESPONDER.value = Number(info.responder_id);
       BindData.responder_id = info.responder_id;
-      init_user(info.responder_id);
     }
     
     BindData.date = info.modify_time;

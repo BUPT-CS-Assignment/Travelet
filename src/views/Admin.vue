@@ -45,14 +45,14 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Logo from '@/components/util/Logo.vue';
-import {assert, clear} from '@/plugins/query'
+import {assert_admin, clear} from '@/plugins/query'
 
 const Router = useRouter();
 
 const Targets = {
 	about: {
 	name: '账单',
-	link: '',
+	link: '/bill',
 	icon: 'mdi-book'
 	},
 	user: {
@@ -86,7 +86,7 @@ function logout() {
 }
 
 onMounted(() => {
-	if(!assert()) {
+	if(!assert_admin()) {
 	Router.push('/login');
 	return;
 	}  

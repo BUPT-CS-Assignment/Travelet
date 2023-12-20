@@ -426,21 +426,6 @@ function uploadModify() {
 }
 
 // on init
-function init_user(user_id) {
-  if(user_id === QUERY.get_user_id()) {
-    BindData.name = QUERY.get_user_name();
-    return;
-  }
-
-  QUERY.get('/api/user/info', {
-    'user_id' : user_id
-  })
-  .then(data => {
-    const basic = data.data;
-    BindData.name = basic.username;
-  })
-}
-
 function init() {
   QUERY.get('/api/user/request/query_detail',{
     request_id : REQUEST_ID
@@ -449,6 +434,7 @@ function init() {
     console.log(data)
     const info = data.data;
     BindData.poster_id = Number(info.poster_id);
+    BindData.name = info.poster;
     BindData.location = info.city;
     BindData.create_time = info.create_time;
     BindData.modify_time = info.modify_time;
@@ -459,7 +445,6 @@ function init() {
     BindData.images = info.image_files;
     BindData.files = info.raw_files;
 
-    init_user(BindData.poster_id);
     Status.loaded = true;
     if(RefLoading.value) RefLoading.value.hide();
   })

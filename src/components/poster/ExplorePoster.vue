@@ -3,29 +3,34 @@
   <template v-slot:default="{ isHovering, props }">
     <v-card 
       rounded="lg" variant="flat" 
-      min-width=400 max-width=800 
+      width=400
       v-bind="props"
       :elevation="isHovering ? 10 : 1"
       @click="checkDetail"
     >
       <v-img :src="Data.img"
         lazy-src="https://fakeimg.pl/400x300/?retina=1&text=image&font=lobster"
-        aspect-ratio="4/3"
+        height="330" cover
       />
-      <div class="my-2" :class="isHovering ? 'ml-4' : 'ml-6'">
+      <div class="mt-2 mb-1" :class="isHovering ? 'ml-4' : 'ml-6'">
         <v-avatar v-for="i in 3"
           size="5" style="margin-left: 3px;"
           :color="StatusString[Data.status].color"
         />
       </div>
 
-      <div class="mx-6 mb-6">
+      <div class="mx-3 mb-4">
+        <template v-if="Data.showname">
+          <p class="ml-3 text-caption text-brown-lighten-2 font-weight-bold">
+            发布者: {{ Data.name }}
+          </p>
+        </template>
 
-        <p class="text-h6">
+        <p class="mx-3 text-h6 d-inline-block text-truncate">
           {{ Data.biref }}
         </p>
 
-        <div class="d-flex">
+        <div class="d-flex mx-2">
           <v-chip size="small" v-for="(tag, index) in Data.tags"
             class="mr-1" color="grey" style="z-index:9"
             @click.stop="tagClick(tag)"
@@ -55,9 +60,6 @@
             </p>
           </v-col>
         </v-row>
-        
-        
-        
       </div>
     </v-card>
   </template>
@@ -81,6 +83,10 @@ const props = defineProps({
     type: Object,
     required: true
   },
+  name: {
+    type: Boolean,
+    default: false
+  },
   tagAction: {
     type: Function,
     default: () => {}
@@ -99,6 +105,8 @@ const StatusString = [
 ]
 
 const Data = reactive({
+  showname: false,
+  name: props.data.poster,
   location: props.data.city,
   tags: props.data.tags,
   date: props.data.modify_time,
@@ -122,4 +130,7 @@ function checkDetail() {
   Router.push('/home/detail/' + props.id)
 }
 
+onMounted(()=>{
+  Data.showname = props.name;
+})
 </script>
