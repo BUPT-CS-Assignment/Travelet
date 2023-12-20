@@ -341,7 +341,7 @@ function remove() {
     request_id: REQUEST_ID
   })
   .then(data => {
-    RefLoading && RefLoading.value.hide();
+    if(RefLoading.value) RefLoading.value.hide();
     Events.warn('删除成功')
     BindData.status = 2;
   })
@@ -354,7 +354,7 @@ function repost() {
     request_id: REQUEST_ID
   })
   .then(data => {
-    RefLoading && RefLoading.value.hide();
+    if(RefLoading.value) RefLoading.value.hide();
     Events.info('发布成功')
     init();
   })
@@ -452,7 +452,13 @@ function init() {
 
     init_user(BindData.poster_id);
     Status.loaded = true;
-    RefLoading && RefLoading.value.hide();
+    if(RefLoading.value) RefLoading.value.hide();
+  })
+  .catch(err => {
+    Events.err(err);
+    setTimeout(()=>{
+      Router.push('/home');
+    },1200);
   })
 }
 

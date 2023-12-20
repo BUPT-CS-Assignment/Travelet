@@ -142,7 +142,7 @@ function fetchData(){
     Object.keys(Posts).forEach(key => {
       delete Posts[key];
     })
-    RefLoading && RefLoading.value.hide();
+    if(RefLoading.value) RefLoading.value.hide();
 
     PageLen.value = data.total_pages;
     Events.info('找到 ' + data.total_pages + ' 页数据')

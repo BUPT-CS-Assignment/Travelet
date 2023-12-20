@@ -35,8 +35,8 @@ function showAlert(title, text, type) {
     timeout_id = setTimeout(()=>{
       RefAlert.value = false;
       timeout_id = null;
-    }, 3000);
-  }, 500);
+    }, 2200);
+  }, 200);
 }
 
 window.onerror = function (msg, url, lineNo, columnNo, error) {
