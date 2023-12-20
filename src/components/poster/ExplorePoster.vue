@@ -101,7 +101,7 @@ const StatusString = [
 const Data = reactive({
   location: props.data.city,
   tags: props.data.tags,
-  date: props.data.create_time,
+  date: props.data.modify_time,
   biref: props.data.description,
   status: props.data.status,
   img: randomImage(),

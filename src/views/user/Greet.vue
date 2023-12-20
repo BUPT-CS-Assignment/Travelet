@@ -2,14 +2,11 @@
 <div class="d-flex flex-column">
   <!-- title -->
   <p class=" text-h5 font-weight-black align-self-center">
-    有朋自远方来
-  </p>
-
-  <p class="align-self-center text-body-2 text-grey-darken-2 mt-2">
     {{ UserCity }}
   </p>
-  <p class="align-self-center text-caption text-grey-darken-2">
-    第 {{ PageVal }} 页 / 共 {{ PageLen }} 页
+
+  <p class="align-self-center text-body-2 text-grey-darken-2 mt-3">
+    共 <strong>{{ TotalLen }} </strong> 条请求
   </p>
 
     <!-- search bar -->
@@ -33,7 +30,7 @@
   <div class="my-2">
     <v-row>
       <v-col v-for="(value, key) in Posts" justify="center">
-        <poster :id="Number(key)" :data="value" :tagAction="newQuery"/>
+        <poster :id="Number(value.id)" :data="value" :tagAction="newQuery"/>
       </v-col>
     </v-row>
   </div>
@@ -65,7 +62,8 @@ const Router = useRouter();
 
 ///// const values
 const UserCity = ref('');
-const PageLen = ref(undefined);
+const PageLen = ref(1);
+const TotalLen = ref(0);
 
 ///// ref
 const RefTagsInput = ref(null);
@@ -74,7 +72,7 @@ const RefLoading = ref(null);
 
 ///// v-model
 const PageVal = ref(1);
-const Posts = reactive({})
+const Posts = reactive([])
 var Tags = [];
 
 function newQuery(tags = []) {
@@ -110,24 +108,23 @@ function fetchData(){
   }
 
   console.log(params);
-  QUERY.get('/api/user/request/query_brief', params)
+  QUERY.get('/api/user/request/query_brief', params, 'poster_id')
   .then(data => {
     console.log(data)
 
-    Object.keys(Posts).forEach(key => {
-      delete Posts[key];
-    })
+    Posts.splice(0);
     if(RefLoading.value) RefLoading.value.hide();
 
     PageLen.value = data.total_pages;
-    Events.info('找到 ' + data.total_pages + ' 页数据')
+    TotalLen.value = data.total_num;
+    Events.info('找到 ' + data.total_num + ' 条数据')
 
-    setTimeout(()=>{
-      data.data.forEach(element => {
-        Posts[element.id] = element
-      });
-    }, 100);
-
+    data.data.sort((a, b) => {
+      if(a.status == b.status) return new Date(b.modify_time) - new Date(a.modify_time);
+      else return a.status - b.status;
+    }).forEach(element => {
+        Posts.push(element)
+    });
   })
 }
 

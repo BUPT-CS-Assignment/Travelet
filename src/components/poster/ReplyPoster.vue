@@ -25,7 +25,7 @@
       </v-chip>
 
       <!-- reply content -->
-      <p class="ml-3 mt-2"> 
+      <p class="ml-3 mt-2 mr-3"> 
         <strong class="text-subtitle-1 font-weight-bold mr-2">于 {{ Data.create_time }} 回复 :</strong>
         {{ Data.description }} 
       </p>
@@ -34,7 +34,7 @@
         <div class="d-flex">
           <v-icon class="mt-1" size="33" color="grey-darken-2">mdi-format-quote-open</v-icon>
           <div style="width:100%">
-            <p class="ml-2 mt-2 text-grey-darken-1"> 
+            <p class="ml-2 mt-2 text-grey-darken-1 mr-2"> 
               <strong class="text-subtitle-1 font-weight-bold mr-2"> 于 {{ Data.post_time }} 发布 : </strong>
               {{ Data.biref }}
             </p>

@@ -79,6 +79,9 @@ const checkIsPoster = computed(() => {
 })
 
 function filterResponse(data) {
+  data.sort((a, b) => {
+    return new Date(b.modify_time) - new Date(a.modify_time);
+  })
   BindReply.total = data.length;
   BindReply.data = [];
   // find accepted

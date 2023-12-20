@@ -249,14 +249,14 @@
 
 <!-- title -->
 <p class="text-h5 font-weight-black align-self-center ml-3">
-  全部回复
+  全部回复 {{ TotalNum }}
 </p>
 
 <!-- post content -->
 <div class="my-2">
   <v-row>
     <v-col v-for="(value, key) in Reply" class="ma-2">
-      <poster :id="Number(key)" :data="value"/>
+      <poster :id="Number(value.id)" :data="value"/>
     </v-col>
   </v-row>
 </div>
@@ -305,7 +305,8 @@ const Latest = reactive({
 
 const Update = ref(false);
 const Change = ref(false);
-const Reply = reactive({})
+const Reply = reactive([])
+const TotalNum = ref(0);
 
 const rules = {
   required: (value) => !!value || '不能为空',
@@ -427,13 +428,15 @@ function checkLatest() {
 
 function fetchReply(){
   QUERY.get('/api/user/response/query_brief', {
-    page : 1,
     responder_id : UserData.id
   })
   .then(data => {
     console.log(data)
-    data.data.forEach(element => {
-      Reply[element.id] = element;
+    TotalNum.value = data.total_num;
+    data.data.sort((a, b) => {
+      return new Date(b.modify_time) - new Date(a.modify_time)
+    }).forEach(element => {
+      Reply.push(element);
     })
   })
 }
