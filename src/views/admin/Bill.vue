@@ -89,7 +89,7 @@ export default {
   setup() {
     // Reactive properties
     const Router = useRouter();
-    const current_tag = ref('bad');
+    const current_tag = ref('老少皆宜');
     const current_location = ref('北京市，海淀区');
     const start_month = ref('2023-09');
     const end_month = ref('2023-12');
