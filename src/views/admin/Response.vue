@@ -17,13 +17,9 @@
   
   
   <!-- search bar -->
-  <!--div style="min-width: 400px; max-width: 600px;" class="align-self-center">
+  <div style="min-width: 400px; max-width: 600px;" class="align-self-center">
     <v-divider class="my-6" />
-    <TagBar class="align-self-center mb-4" style="height: 90px;"
-      ref="RefSearchInput"
-      :action="newQuery"
-    />
-  </div-->
+  </div>
 
   <v-spacer class="my-2"></v-spacer>
 

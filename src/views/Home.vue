@@ -46,7 +46,6 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Logo from '@/components/util/Logo.vue';
 import {assert, clear} from '@/plugins/query'
-import * as Events from '@/plugins/event'
 
 const Router = useRouter();
 
