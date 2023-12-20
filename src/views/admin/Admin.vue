@@ -15,7 +15,7 @@
       </div>
     </div>
     <div id="chart" :style="{ width: '80%', height: '400px' }" class="charts"></div>
-    <v-data-table :headers="headers" :items="filteredBills" :items-per-page="10"></v-data-table>
+    <v-data-table :headers="headers" :items="filteredBills" :items-per-page="10" :style="{ width: '60%' }"></v-data-table>
   </div>
 </template>
 
