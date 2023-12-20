@@ -77,6 +77,7 @@ import Loading from '@/components/util/Loading.vue';
 
 import TagsPreset from '@/plugins/tags'
 import * as QUERY from '@/plugins/query'
+import * as Events from '@/plugins/event'
 
 ///// router
 const Route = useRoute();
@@ -144,18 +145,13 @@ function fetchData(){
     RefLoading && RefLoading.value.hide();
 
     PageLen.value = data.total_pages;
+    Events.info('找到 ' + data.total_pages + ' 页数据')
 
     setTimeout(()=>{
       data.data.forEach(element => {
         Posts[element.id] = element
       });
     }, 100);
-
-    
-  })
-  .catch(err => {
-    alert(err);
-    Router.push('/home');
   })
 }
 

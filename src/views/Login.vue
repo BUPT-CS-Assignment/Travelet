@@ -70,7 +70,7 @@ import { useRouter } from 'vue-router';
 import Logo from '@/components/util/Logo.vue';
 
 import * as QUERY from '@/plugins/query'
-
+import * as Events from '@/plugins/event'
 
 const Router = useRouter();
 
@@ -105,7 +105,7 @@ const assert = computed(() => {
 
 function login() {
   if(!assert) {
-    alert('用户名或密码不能为空');
+    Events.err('用户名或密码不能为空')
     return;
   }
 
@@ -119,11 +119,10 @@ function login() {
     
     if(Input.usr == 'admin')
       Router.push('/admin');
-    else
+    else {
+      Events.info('登录成功')
       Router.push('/home');
-  })
-  .catch(err => {
-    alert(err);
+    }
   })
 }
   

@@ -268,6 +268,7 @@ import Poster from '@/components/poster/ReplyPoster.vue'
 
 import * as QUERY from '@/plugins/query'
 import {assert} from '@/plugins/query'
+import * as Events from '@/plugins/event'
 
 const Router = useRouter();
 
@@ -327,7 +328,7 @@ const input_assert2 = computed(() => {
 
 function postUpdate() {
   if(!input_assert2) {
-    alert('请检查输入');
+    Events.warn('请检查输入');
     return;
   }
 
@@ -336,19 +337,18 @@ function postUpdate() {
   if(Input.intro !== UserData.intro) data.description = Input.intro;
 
   if(data == {}) {
-    alert('没有修改任何信息');
+    Events.warn('没有修改任何信息');
     return;
   }
 
+  if(!confirm('确认修改信息?')) return;
+
   QUERY.post('/api/user/modify_data', data, 'user_id')
   .then(data => {
-    if(data.status == 0) {
-      alert('修改成功');
-      UserData.phone = Input.phone;
-      UserData.intro = Input.intro;
-      resetUpdate();
-    }
-    else alert('修改失败');
+    Events.info('修改成功')
+    UserData.phone = Input.phone;
+    UserData.intro = Input.intro;
+    resetUpdate();
   })
 }
 
@@ -362,19 +362,18 @@ function resetChange() {
 
 function postChange() {
   if(!input_assert) {
-    alert('请检查输入');
+    Events.warn('请检查输入');
     return;
   }
+
+  if(!confirm('确认修改密码?')) return;
 
   QUERY.post('/api/user/modify_data', {
     password: Input.pwd
   }, 'user_id')
   .then(data => {
-    if(data.status == 0) {
-      alert('修改成功');
-      resetChange();
-    }
-    else alert('修改失败');
+    Events.info('修改成功')
+    resetChange();
   })
 }
 

@@ -1,3 +1,4 @@
+import * as Events from '@/plugins/event'
 function set_user_name(username) {
   localStorage.setItem('username', username);
 }
@@ -29,8 +30,10 @@ function clear() {
 }
 
 function assert() {
-  return localStorage.getItem('userid') !== null &&
+  const flag = localStorage.getItem('userid') !== null &&
          localStorage.getItem('username') !== null;
+  if(!flag) Events.err('未登录')
+  return flag;
 }
 
 function fileURL(uid) {
@@ -38,20 +41,16 @@ function fileURL(uid) {
 }
 
 async function download(uid) {
-  try{
-    const response = await fetch('/api/file/download/' + String(uid));
-    const blob = await response.blob();
-    const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    const contentDisposition = response.headers.get('content-disposition');
-    const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
-    const fileName = fileNameMatch ? fileNameMatch[1] : 'downloaded_file';
-    link.download = fileName;
-    link.click();
-    window.URL.revokeObjectURL(link.href);
-  }catch(err) {
-    alert(err)
-  }
+  const response = await fetch('/api/file/download/' + String(uid));
+  const blob = await response.blob();
+  const link = document.createElement('a');
+  link.href = window.URL.createObjectURL(blob);
+  const contentDisposition = response.headers.get('content-disposition');
+  const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
+  const fileName = fileNameMatch ? fileNameMatch[1] : 'downloaded_file';
+  link.download = fileName;
+  link.click();
+  window.URL.revokeObjectURL(link.href);
 }
 
 function get(url, param = {}, identifier = null) {
@@ -78,7 +77,7 @@ function get(url, param = {}, identifier = null) {
     })
     .catch(err => {
       console.log(err);
-      throw err;
+      reject(err);
     })
   })
 }
@@ -107,7 +106,7 @@ function post(url, data, identifier = null, json = true, headers = {}) {
     })
     .catch(err => {
       console.log(err);
-      throw err;
+      reject(err);
     })
   })
 }

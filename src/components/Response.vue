@@ -202,6 +202,7 @@ import ImageAmp from '@/components/util/ImageAmp.vue';
 import Loading from './util/Loading.vue';
 import * as FILES from '@/plugins/files'
 import * as QUERY from '@/plugins/query'
+import * as Events from '@/plugins/event'
 
 ///// props
 const props = defineProps({
@@ -299,6 +300,7 @@ function serverFileRemove(idx) {
 ///// operations
 // action
 function accept() {
+  if(!confirm('确认采纳?')) return;
   RefLoading.value.show();
   QUERY.post('/api/user/request/reply',{
     request_id: props.request_id,
@@ -306,13 +308,14 @@ function accept() {
     action: "accept"
   })
   .then(data => {
-    RefLoading.value.hide();
-    alert("已采纳回复")
+    RefLoading && RefLoading.value.hide();
+    Events.info('已采纳回复')
     window.location.reload();
   })
 }
 
 function reject() {
+  if(!confirm('确认拒绝?')) return;
   RefLoading.value.show();
   QUERY.post('/api/user/request/reply',{
     request_id: props.request_id,
@@ -321,7 +324,7 @@ function reject() {
   })
   .then(data => {
     RefLoading.value.hide();
-    alert("已拒绝回复")
+    Events.warn('已拒绝回复')
     window.location.reload();
   })
 }
@@ -339,6 +342,8 @@ function openModify() {
 function uploadModify() {
   if(props.response_id == null || props.response_id == NaN || props.response_id == undefined)
     return;
+
+  if(!confirm('确认修改?')) return;
 
   Status.uploading = true;
   var formData = new FormData();
@@ -361,8 +366,8 @@ function uploadModify() {
 
   QUERY.post('/api/user/response/modify', formData, null, false)
   .then(res => {
-    alert('修改成功');
-    window.location.reload();
+    Events.info('修改成功');
+    init();
   })
 }
 
@@ -379,6 +384,7 @@ function cancel() {
 
 // upload
 function upload() {
+  if(!confirm('确认发布?')) return;
   Status.uploading = true;
   const formData = new FormData();
   formData.append('description', BindInput.desc);
@@ -398,18 +404,19 @@ function upload() {
   QUERY.post('/api/user/response/post', formData, null, false)
   .then(res => {
     Status.uploading = false;
-    alert('发布成功')
+    Events.info('发布成功')
     props.on_success();
   })
 }
 
 // delete current
 function remove() {
+  if(!confirm('确认删除?')) return;
   QUERY.post('/api/user/response/delete', {
     response_id: props.response_id
   })
   .then(data => {
-    alert('删除成功');
+    Events.warn('删除成功');
     props.on_delete();
   })
 }
