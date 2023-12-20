@@ -348,7 +348,7 @@ function remove() {
 
 function repost() {
   RefLoading.value.show();
-  QUERY.post('/api/user/request/repost', {
+  QUERY.post('/api/user/request/reset', {
     request_id: REQUEST_ID
   })
   .then(data => {
