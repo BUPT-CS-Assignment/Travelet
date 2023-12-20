@@ -308,7 +308,7 @@ function accept() {
     action: "accept"
   })
   .then(data => {
-    RefLoading && RefLoading.value.hide();
+    if(RefLoading.value) RefLoading.value.hide();
     Events.info('已采纳回复')
     window.location.reload();
   })
@@ -323,7 +323,7 @@ function reject() {
     action: "deny"
   })
   .then(data => {
-    RefLoading.value.hide();
+    if(RefLoading.value) RefLoading.value.hide();
     Events.warn('已拒绝回复')
     window.location.reload();
   })
@@ -440,6 +440,7 @@ function init_user(user_id) {
 
 // init infomation
 function init() {
+  Status.update = false;
   if(props.responder_id != null) init_user(props.responder_id);
 
   if(props.response_id == null || props.response_id == NaN || props.response_id == undefined)
