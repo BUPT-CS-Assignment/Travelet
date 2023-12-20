@@ -88,6 +88,7 @@ import Logo from '@/components/util/Logo.vue';
 import RegionSelect from '@/components/util/RegionSelect.vue';
 
 import * as QUERY from '@/plugins/query'
+import * as Events from '@/plugins/event'
 
 const RegionRef = ref(null);
 const Router = useRouter();
@@ -137,7 +138,7 @@ const assert = computed(() => {
 
 function register() {
   if(!assert) {
-    alert('注册信息不正确，请检查输入');
+    Events.warn('注册信息不正确，请检查输入')
     return;
   }
 
@@ -148,15 +149,9 @@ function register() {
     register_city: RegionRef.value.getString()
   })
   .then(res => {
-    console.log(res)
-    if(res.status == 0) {
-      alert('注册成功')
-      Router.push('/login');
-    } else {
-      alert('注册失败');
-    }
+    Events.info('注册成功');
+    Router.push('/login');
   })
-  .catch(err => alert(err))
 }
 
 

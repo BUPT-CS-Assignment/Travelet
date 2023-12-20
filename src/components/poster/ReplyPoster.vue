@@ -117,9 +117,6 @@ function queryBrief() {
     Data.post_time = data.data.create_time;
     Data.post_status = Number(data.data.status)
   })
-  .catch(err => {
-    alert(err);
-  })
 }
 
 onMounted(()=>{

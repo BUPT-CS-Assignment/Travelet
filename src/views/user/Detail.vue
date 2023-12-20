@@ -69,9 +69,8 @@
       </div>
     </template>
     <template v-else>
-      <tag-bar ref="RefTagInput" class="mt-2"
+      <tag-bar ref="RefTagsInput" class="mt-2"
         :tags="TagsPreset" 
-        :preset="BindData.tags" 
         icon="mdi-tag-multiple-outline"
       />
       <v-textarea 
@@ -232,6 +231,7 @@ import TagsPreset from '@/plugins/tags'
 import * as FILES from '@/plugins/files'
 import * as QUERY from '@/plugins/query'
 import {assert} from '@/plugins/query'
+import * as Events from '@/plugins/event'
 
 ///// router
 const Route = useRoute();
@@ -256,7 +256,7 @@ const Status = reactive({
 const RefImageAmp = ref(null);
 const RefImageInput = ref(null);
 const RefFileInput = ref(null);
-const RefTagInput = ref(null);
+const RefTagsInput = ref(null);
 const RefLoading = ref(null);
 
 ///// v-model
@@ -335,25 +335,27 @@ function serverFileRemove(idx) {
 
 ///// delete current
 function remove() {
+  if(!confirm('确认删除?')) return;
   RefLoading.value.show();
   QUERY.post('/api/user/request/delete', {
     request_id: REQUEST_ID
   })
   .then(data => {
-    RefLoading.value.hide();
-    alert('删除成功');
+    RefLoading && RefLoading.value.hide();
+    Events.warn('删除成功')
     BindData.status = 2;
   })
 }
 
 function repost() {
+  if(!confirm('确认重新发布?')) return;
   RefLoading.value.show();
   QUERY.post('/api/user/request/reset', {
     request_id: REQUEST_ID
   })
   .then(data => {
-    RefLoading.value.hide();
-    alert('发布成功');
+    RefLoading && RefLoading.value.hide();
+    Events.info('发布成功')
     init();
   })
 }
@@ -366,6 +368,10 @@ function openModify() {
   BindInput.image_data = [];
   BindInput.deleted = [];
   Status.modify = true;
+  setTimeout(()=>{
+    RefTagsInput.value.setData(BindData.tags);
+  },200);
+  
 }
 
 function cancelUpdate() {
@@ -375,13 +381,14 @@ function cancelUpdate() {
 }
 
 function uploadModify() {
+  if(!confirm('确认修改?')) return;
   RefLoading.value.show();
   var formData = new FormData();
   formData.append('request_id', REQUEST_ID);
   formData.append('title', BindData.biref);
   formData.append('description', BindInput.desc);
   // tags
-  const tags = RefTagInput.value.getData();
+  const tags = RefTagsInput.value.getData();
   for (let i = 0; i < tags.length; i++) {
     const tag = tags[i];
     formData.append('tags', tag);
@@ -403,7 +410,8 @@ function uploadModify() {
 
   QUERY.post('/api/user/request/modify', formData, null, false)
   .then(res => {
-    alert('修改成功');
+    Events.info('修改成功')
+    Status.modify = false;
     init();
   })
 }

@@ -164,6 +164,7 @@ import TagBar from '@/components/util/TagBar.vue';
 import TagsPreset from '@/plugins/tags'
 import * as FILES from '@/plugins/files'
 import * as QUERY from '@/plugins/query'
+import * as Events from '@/plugins/event'
 
 const props = defineProps({
   onCancel: {
@@ -226,8 +227,9 @@ function checkStep2(){
 
 
 function upload() {
+  if(!confirm('确认发布?')) return;
   if(!checkStep1() || !checkStep2()) {
-    alert('请填写完整信息');
+    Events.warn('请填写完整信息');
     return;
   }
 
@@ -261,11 +263,8 @@ function upload() {
   // post
   QUERY.post('/api/user/request/post', formData, null, false)
   .then(res => {
-    alert('发布成功');
+    Events.info('发布成功')
     props.onComplete();
-  })
-  .catch(err => {
-    alert(err);
   })
 }
 

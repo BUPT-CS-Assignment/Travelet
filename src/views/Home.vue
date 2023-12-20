@@ -46,6 +46,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Logo from '@/components/util/Logo.vue';
 import {assert, clear} from '@/plugins/query'
+import * as Events from '@/plugins/event'
 
 const Router = useRouter();
 
@@ -74,15 +75,17 @@ function targetTo(key) {
 }
 
 function logout() {
-  clear();
-  Router.push('/login');
+  if(confirm('确认登出?')) {
+    clear();
+    Router.push('/login');
+  }
 }
 
 onMounted(() => {
   if(!assert()) {
     Router.push('/login');
     return;
-  }
+  }  
 })
 
 </script>
