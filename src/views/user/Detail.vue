@@ -454,6 +454,12 @@ function init() {
     Status.loaded = true;
     RefLoading && RefLoading.value.hide();
   })
+  .catch(err => {
+    Events.err(err);
+    setTimeout(()=>{
+      Router.push('/home');
+    },1200);
+  })
 }
 
 onMounted(() => {
