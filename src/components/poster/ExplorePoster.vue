@@ -38,18 +38,18 @@
       
       
       <div class="d-flex flex-row px-6 py-2" style="background-color: #f2f2f2;">
-        <v-row class="text-grey text-body-2 font-weight-bold">
-          <v-col class="d-flex">
+        <v-row class="text-grey text-body-2 font-weight-bold"  justify="space-between">
+          <v-col class="d-flex" cols="auto">
             <p class="align-self-center">
             {{ StatusString[Data.status].text }}
           </p>
           </v-col>
-          <v-col class="d-flex">
+          <v-col class="d-flex" cols="auto">
             <p class="align-self-center">
               {{ Data.location }}
             </p>
           </v-col>
-          <v-col class="d-flex">
+          <v-col class="d-flex" cols="auto">
             <p class="ml-auto text-overline">
               {{ Data.date }}
             </p>
