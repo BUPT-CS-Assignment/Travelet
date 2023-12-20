@@ -31,6 +31,14 @@ const routes = [
       {
         path: '',
         component: () => import('@/views/admin/Bill.vue')
+      },
+      {
+        path: 'request',
+        component: () => import('@/views/admin/Request.vue')
+      },
+      {
+        path: 'response',
+        component: () => import('@/views/admin/Response.vue')
       }
     ]
   },

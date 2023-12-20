@@ -62,12 +62,12 @@ const Targets = {
 	},
 	seeking: {
 	name: '寻去处',
-	link: '/explore',
+	link: '/request',
 	icon: 'mdi-map-search'
 	},
 	welcome: {
 	name: '欢迎来',
-	link: '/greet',
+	link: '/response',
 	icon: 'mdi-map-marker-star'
 	}
 }
