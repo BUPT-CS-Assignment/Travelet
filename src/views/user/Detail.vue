@@ -74,10 +74,11 @@
         icon="mdi-tag-multiple-outline"
       />
       <v-textarea 
+        counter
+        :rules="[rules.required, rules.max]"
         rounded="lg"
         v-model="BindInput.desc"
         auto-grow
-        hide-details
         variant="outlined"
         class="mb-2"
       />
@@ -183,7 +184,7 @@
           <p class="text-subtitle-1">取消</p>
         </v-btn>
         <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0"
-          :disabled="BindInput.desc.length == 0" 
+          :disabled="!assert_desc" 
           @click="uploadModify"
         >
           <p class="text-subtitle-1">保存</p>
@@ -286,6 +287,14 @@ const BindData = reactive({
 const checkIsPoster = computed(() => {
   return USER_ID == BindData.poster_id;
 })
+const rules = {
+  required: (value) => !!value || '不能为空',
+  max: (v) => v.length <= 800 || '不能超过800个字符',
+}
+const assert_desc = computed(() => {
+  return rules.required(BindInput.desc) === true &&
+         rules.max(BindInput.desc) === true;
+})
 
 ///// text
 const DescFormatted = computed(() => {
@@ -375,7 +384,7 @@ function openModify() {
 }
 
 function cancelUpdate() {
-  RefLoading.value.show();
+  Events.warn('已取消修改')
   Status.modify = false;
   init();
 }

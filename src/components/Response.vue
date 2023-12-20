@@ -52,6 +52,8 @@
     </template>
     <template v-else>
       <v-textarea 
+        :rules="[rules.required, rules.max]"
+        counter
         rounded="lg"
         v-model="BindInput.desc"
         auto-grow
@@ -138,7 +140,7 @@
       
       <template v-if="props.response_id == null">
         <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0"
-          :disabled="BindInput.desc.length == 0 || Status.uploading" 
+          :disabled="Status.uploading || !assert_desc" 
           @click="upload"
         >
           <p class="text-subtitle-1">{{ Status.uploading ? '请稍后' : '发布' }}</p>
@@ -146,7 +148,7 @@
       </template>
       <template v-else>
         <v-btn color="blue-accent-3" class="align-self-start ml-2" elevation="0"
-          :disabled="BindInput.desc.length == 0 || Status.uploading" 
+          :disabled="Status.uploading || !assert_desc" 
           @click="uploadModify"
         >
           <p class="text-subtitle-1">{{ Status.uploading ? '请稍后' : '保存' }}</p>
@@ -248,6 +250,16 @@ const BindData = reactive({
   images: [],
   files: [],
   status: 0
+})
+
+///// rules
+const rules = {
+  required: (value) => !!value || '不能为空',
+  max: (v) => v.length <= 800 || '不能超过800个字符',
+}
+const assert_desc = computed(() => {
+  return rules.required(BindInput.desc) === true &&
+         rules.max(BindInput.desc) === true;
 })
 
 ///// text
