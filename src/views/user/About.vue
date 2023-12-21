@@ -3,7 +3,7 @@
 <div class="d-flex flex-row flex-wrap">
 
   <!-- latest reponse -->
-  <div class="flex-grow-1 mx-3 pr-10 my-6" style="min-width: 500px;">
+  <div class="flex-grow-1 mx-3 pr-4 my-6" style="min-width: 520px;">
     <v-hover>
       <template v-slot:default="{ isHovering, props }">
         <v-card 
@@ -49,20 +49,20 @@
           <v-divider></v-divider>
           <v-card-text class="d-flex flex-row">
             <template v-if="Latest.flag">
-              <v-row class="mx-4 text-grey text-subtitle-2 font-weight-bold" justify="space-around">
-                <v-col class="d-flex align-end">
+              <v-row class="mx-2 text-grey text-subtitle-2 font-weight-bold" justify="space-around">
+                <v-col class="d-flex align-end" cols="auto">
                   <v-icon size="25">mdi-alarm</v-icon>
                   <p class="ml-1">
                     {{ Latest.date }}
                   </p>
                 </v-col>
-                <v-col class="d-flex align-end">
+                <v-col class="d-flex align-end" cols="auto">
                   <v-icon size="23">mdi-map-marker-outline</v-icon>
                   <p class="ml-1">
                     {{ Latest.city }}
                   </p>
                 </v-col>
-                <v-col class="d-flex align-end">
+                <v-col class="d-flex align-end" cols="auto">
                   <v-icon size="23">mdi-text-box-outline</v-icon>
                   <span class="ml-1 d-inline-block text-truncate">
                     {{ Latest.brief }}  

@@ -1,5 +1,4 @@
 <template>
-<v-app>
   <v-alert
     closable
     v-model="RefAlert"
@@ -12,8 +11,6 @@
     style="position: fixed; bottom: 30px; right: 20px; z-index: 1000;"
   />
   <router-view />
-
-</v-app>
 </template>
 
 <script setup>
