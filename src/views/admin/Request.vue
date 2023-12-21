@@ -129,9 +129,13 @@ function fetchData(){
     data.data.sort((a, b) => {
       if(a.status == b.status) return new Date(b.modify_time) - new Date(a.modify_time);
       else return a.status - b.status;
-    }).forEach(element => {
-      Posts.push(element);
-    });
+    })
+
+    setTimeout(()=>{
+      data.data.forEach(element => {
+        Posts.push(element);
+      });
+    }, 200);
   })
 }
 
@@ -158,7 +162,10 @@ function parseRoute(query) {
   if(data.page < 1) data.page = 1;
 
   if(query.search) {
-    data.search = query.search;
+    if(typeof(query.search) == 'string')
+      data.search = [query.search];
+    else if(Array.isArray(query.search))
+      data.search = query.search;
   }
 
   // console.log({
