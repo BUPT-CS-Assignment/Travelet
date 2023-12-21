@@ -121,12 +121,15 @@ export default {
       ],
     });
     const headers = ref([
-      { title: 'Id', value: 'id' },
-      { title: 'Year', value: 'year' },
-      { title: 'Month', value: 'month' },
-      { title: 'Amount', value: 'amount' },
-      { title: 'Profit', value: 'profit' }
+      { title: '账单ID', value: 'id' },
+      { title: '年', value: 'year' },
+      { title: '月', value: 'month' },
+      { title: '达标数量', value: 'amount' },
+      { title: '收益/元', value: 'profit' }
     ]);
+    const billHeaders = [
+      'id', 'year', 'month', 'amount', 'profit'
+    ]
     
     Object.keys(CITIES).forEach((province) => {
       CITIES[province].forEach((city) => {
@@ -149,8 +152,8 @@ export default {
       
       filteredBills.value = sortedBills.value.map(item => {
         const filteredItem = {};
-        headers.value.forEach(header => {
-          const field = header.title.toLowerCase();
+        billHeaders.forEach(header => {
+          const field = header;
           filteredItem[field] = item[field];
         });
         return filteredItem;
@@ -198,12 +201,14 @@ export default {
         this.start_month,
         this.end_month
       );
-
+      const billHeaders = [
+        'id', 'year', 'month', 'amount', 'profit'
+      ]
       // Update filteredBills
       this.filteredBills = this.sortedBills.map(item => {
         const filteredItem = {};
-        this.headers.forEach(header => {
-          const field = header.title.toLowerCase();
+        billHeaders.forEach(header => {
+          const field = header;
           filteredItem[field] = item[field];
         });
         return filteredItem;
