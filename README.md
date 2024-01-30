@@ -1,9 +1,12 @@
 # Travelet
 
-**<好去处> 原型系统前端界面** 
-详情参阅 `docs/project.pdf`
+### '好去处'原型系统
 
-后端项目地址: [Travelet-Backend](https://github.com/BUPT-CS-Assignment/Travelet-Backend)
+**基于 `Vue3` + `Vuetify` 打造**
+
+- 项目要求参阅 `docs/project.pdf`
+- 最终汇报参阅 `docs/report.docx`
+- 后端项目地址: [Travelet-Backend](https://github.com/BUPT-CS-Assignment/Travelet-Backend)
 
 ## Snapshot
 ![pic](assets/1.png)
