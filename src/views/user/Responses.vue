@@ -13,6 +13,7 @@
         modify_at_init
         :modified="true"
         :responder_id="USER_ID"
+        :name="QUERY.get_user_name()"
         :request_id="REQUEST_ID" 
         :on_cancel="()=>{Status.dialog=false;}"
         :on_success="()=>{Status.dialog=false; reload();}"
@@ -86,9 +87,11 @@ function filterResponse(data) {
   BindReply.total = data.length;
   BindReply.data = [];
   // find accepted
-  if(BindReply.accepted != null && BindReply.accepted != undefined) {
-    BindReply.data.push({id: BindReply.accepted});
-  }
+  data.forEach(element => {
+    if(element.id == BindReply.accepted) {
+      BindReply.data.push(element);
+    }
+  });
   // find my
   data.forEach(element => {
     if(element.id != BindReply.accepted && element.responder_id == USER_ID) {

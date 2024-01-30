@@ -1,6 +1,16 @@
-# base
+# Travelet
 
-## Project setup
+**<好去处> 原型系统前端界面** 
+详情参阅 `docs/project.pdf`
+
+后端项目地址: [Travelet-Backend](https://github.com/BUPT-CS-Assignment/Travelet-Backend)
+
+## Snapshot
+![pic](assets/1.png)
+![pic](assets/2.png)
+![pic](assets/3.png)
+
+## Setup
 
 ```
 # yarn
